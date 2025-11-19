@@ -91,7 +91,8 @@ def dashboard():
                          total_atuacoes=total_atuacoes,
                          recentes=recentes,
                          horas_por_mes=horas_por_mes,
-                         medalha=medalha)
+                         medalha=medalha,
+                         ano_atual=hoje.year)
 
 
 @app.route('/nova-atuacao', methods=['GET', 'POST'])
