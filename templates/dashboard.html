@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Diário do Contador{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="h3 fw-semibold">Olá, {{ current_user.nome }}!</h1>
+            <p class="text-muted">Bem-vindo ao seu painel de voluntariado</p>
+        </div>
+    </div>
+
+    {% if medalha %}
+    <div class="row mb-4">
+        <div class="col-md-8 mx-auto">
+            <div class="card border-0 shadow-sm medalha-card medalha-{{ medalha.tipo }}">
+                <div class="card-body text-center p-4">
+                    <div class="medalha-icon mb-3">
+                        <i class="bi bi-award-fill"></i>
+                    </div>
+                    <h3 class="h4 fw-bold mb-2">{{ medalha.titulo }}</h3>
+                    <p class="mb-0">{{ medalha.descricao }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-calendar-month text-primary me-2" style="font-size: 1.5rem;"></i>
+                        <h6 class="mb-0 text-muted">Horas no Mês</h6>
+                    </div>
+                    <h2 class="display-5 fw-bold mb-0">{{ "%.1f"|format(horas_mes) }}</h2>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-calendar-year text-success me-2" style="font-size: 1.5rem;"></i>
+                        <h6 class="mb-0 text-muted">Horas no Ano</h6>
+                    </div>
+                    <h2 class="display-5 fw-bold mb-0">{{ "%.1f"|format(horas_ano) }}</h2>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-clipboard-check text-info me-2" style="font-size: 1.5rem;"></i>
+                        <h6 class="mb-0 text-muted">Total de Atuações</h6>
+                    </div>
+                    <h2 class="display-5 fw-bold mb-0">{{ total_atuacoes }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h5 class="card-title fw-semibold mb-4">Horas de Voluntariado por Mês ({{ now().year }})</h5>
+                    <canvas id="horasChart" height="80"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <a href="{{ url_for('nova_atuacao') }}" class="btn btn-primary btn-lg px-5 fw-semibold">
+                <i class="bi bi-plus-circle me-2"></i>Nova Atuação
+            </a>
+        </div>
+    </div>
+
+    {% if recentes %}
+    <div class="row">
+        <div class="col-12">
+            <h5 class="fw-semibold mb-3">Atuações Recentes</h5>
+            <div class="list-group">
+                {% for diario in recentes %}
+                <div class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1 fw-semibold">{{ diario.data.strftime('%d/%m/%Y') }} - {{ diario.periodo }}</h6>
+                            <p class="mb-0 text-muted small">{{ diario.duracao }}h de voluntariado</p>
+                        </div>
+                        <span class="badge bg-primary rounded-pill">{{ diario.duracao }}h</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    const ctx = document.getElementById('horasChart');
+    const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+    const horas = {{ horas_por_mes|tojson }};
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: meses,
+            datasets: [{
+                label: 'Horas de Voluntariado',
+                data: horas,
+                backgroundColor: 'rgba(13, 110, 253, 0.8)',
+                borderColor: 'rgba(13, 110, 253, 1)',
+                borderWidth: 1,
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 5
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}
