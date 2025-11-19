@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Gerenciar Usuários - Diário do Contador{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 fw-semibold">
+            <i class="bi bi-people-fill text-primary"></i> Gerenciar Usuários
+        </h1>
+        <a href="{{ url_for('admin_criar_usuario') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Novo Usuário
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="px-4">Nome</th>
+                            <th>E-mail</th>
+                            <th>Total de Horas</th>
+                            <th>Atuações</th>
+                            <th>Última Atuação</th>
+                            <th class="text-end px-4">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if usuarios_stats %}
+                            {% for user_stat in usuarios_stats %}
+                            <tr>
+                                <td class="px-4">
+                                    <i class="bi bi-person-circle text-muted"></i> {{ user_stat.voluntario.nome }}
+                                    {% if user_stat.voluntario.is_admin %}
+                                        <span class="badge bg-warning text-dark ms-2">
+                                            <i class="bi bi-shield-check"></i> Admin
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ user_stat.voluntario.email }}</td>
+                                <td>
+                                    <span class="badge bg-success">{{ "%.1f"|format(user_stat.total_horas) }}h</span>
+                                </td>
+                                <td>{{ user_stat.total_atuacoes }}</td>
+                                <td>
+                                    {% if user_stat.ultima_atuacao %}
+                                        {{ user_stat.ultima_atuacao.strftime('%d/%m/%Y') }}
+                                    {% else %}
+                                        <span class="text-muted">Nunca</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end px-4">
+                                    {% if user_stat.voluntario.id == current_user.id %}
+                                        <span class="text-muted small">Você</span>
+                                    {% else %}
+                                        <form method="POST" action="{{ url_for('admin_excluir_usuario', usuario_id=user_stat.voluntario.id) }}" style="display: inline;" onsubmit="return confirm('Tem certeza que deseja excluir o usuário {{ user_stat.voluntario.nome }}? Todas as suas atuações também serão excluídas.');">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-trash"></i> Excluir
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">
+                                    Nenhum usuário cadastrado ainda.
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

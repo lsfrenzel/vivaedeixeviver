@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block title %}Painel Administrativo - Diário do Contador{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 fw-semibold">
+            <i class="bi bi-shield-check text-primary"></i> Painel Administrativo
+        </h1>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-primary bg-opacity-10 p-3 rounded">
+                                <i class="bi bi-people-fill text-primary fs-4"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1 small">Voluntários</h6>
+                            <h3 class="mb-0 fw-bold">{{ total_voluntarios }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-success bg-opacity-10 p-3 rounded">
+                                <i class="bi bi-clock-history text-success fs-4"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1 small">Horas este mês</h6>
+                            <h3 class="mb-0 fw-bold">{{ "%.1f"|format(horas_mes_total) }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-info bg-opacity-10 p-3 rounded">
+                                <i class="bi bi-file-earmark-text text-info fs-4"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1 small">Total Atuações</h6>
+                            <h3 class="mb-0 fw-bold">{{ total_atuacoes }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-warning bg-opacity-10 p-3 rounded">
+                                <i class="bi bi-heart-pulse text-warning fs-4"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1 small">Pacientes</h6>
+                            <h3 class="mb-0 fw-bold">{{ total_pacientes }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="bi bi-bar-chart-fill text-primary"></i> Horas por Mês ({{ ano_atual }})
+                    </h5>
+                    <canvas id="horasChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="bi bi-trophy-fill text-warning"></i> Top 10 Voluntários do Mês
+                    </h5>
+                    <div class="list-group list-group-flush">
+                        {% if voluntarios_ativos %}
+                            {% for vol in voluntarios_ativos %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center px-0 border-0">
+                                <span>
+                                    <i class="bi bi-person-badge text-muted"></i> {{ vol.nome }}
+                                </span>
+                                <span class="badge bg-primary rounded-pill">{{ "%.1f"|format(vol.total_horas) }}h</span>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted mb-0">Nenhuma atuação registrada este mês.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm text-center">
+                <div class="card-body">
+                    <i class="bi bi-clock text-success" style="font-size: 3rem;"></i>
+                    <h3 class="mt-3 mb-2 fw-bold">{{ "%.1f"|format(horas_ano_total) }}</h3>
+                    <p class="text-muted mb-0">Horas em {{ ano_atual }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm text-center">
+                <div class="card-body">
+                    <i class="bi bi-book text-info" style="font-size: 3rem;"></i>
+                    <h3 class="mt-3 mb-2 fw-bold">{{ total_livros }}</h3>
+                    <p class="text-muted mb-0">Livros no Catálogo</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm text-center">
+                <div class="card-body">
+                    <i class="bi bi-calendar-check text-primary" style="font-size: 3rem;"></i>
+                    <h3 class="mt-3 mb-2 fw-bold">{{ total_atuacoes }}</h3>
+                    <p class="text-muted mb-0">Atuações Registradas</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const ctx = document.getElementById('horasChart').getContext('2d');
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+        datasets: [{
+            label: 'Horas',
+            data: {{ horas_por_mes }},
+            backgroundColor: 'rgba(13, 110, 253, 0.5)',
+            borderColor: 'rgba(13, 110, 253, 1)',
+            borderWidth: 2,
+            borderRadius: 8
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: {
+                    display: true,
+                    color: 'rgba(0,0,0,0.05)'
+                }
+            },
+            x: {
+                grid: {
+                    display: false
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

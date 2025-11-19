@@ -21,12 +21,24 @@ def seed_database():
         db.session.add_all(hospitais)
         db.session.commit()
         
+        print("Criando administrador...")
+        admin = Voluntario(
+            nome="Administrador",
+            email="admin@teste.com",
+            estado_padrao="SP",
+            hospital_padrao_id=hospitais[0].id,
+            is_admin=True
+        )
+        admin.set_senha("admin123")
+        db.session.add(admin)
+        
         print("Criando voluntário de teste...")
         voluntario = Voluntario(
             nome="Maria Silva",
             email="voluntario@teste.com",
             estado_padrao="SP",
-            hospital_padrao_id=hospitais[0].id
+            hospital_padrao_id=hospitais[0].id,
+            is_admin=False
         )
         voluntario.set_senha("senha123")
         db.session.add(voluntario)
@@ -92,8 +104,12 @@ def seed_database():
         
         print("✅ Banco de dados populado com sucesso!")
         print("\n📝 Credenciais de acesso:")
+        print("\n👤 Voluntário:")
         print("   E-mail: voluntario@teste.com")
         print("   Senha: senha123")
+        print("\n🛡️  Administrador:")
+        print("   E-mail: admin@teste.com")
+        print("   Senha: admin123")
 
 
 if __name__ == "__main__":

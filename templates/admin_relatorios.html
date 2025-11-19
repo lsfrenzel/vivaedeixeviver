@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% block title %}Relatórios - Diário do Contador{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="h3 fw-semibold mb-4">
+        <i class="bi bi-file-earmark-bar-graph text-primary"></i> Relatórios
+    </h1>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-3">Filtros</h5>
+            <form method="GET" class="row g-3">
+                <div class="col-md-4">
+                    <label for="periodo" class="form-label fw-semibold">Período</label>
+                    <select class="form-select" id="periodo" name="periodo">
+                        <option value="mes" {% if periodo == 'mes' %}selected{% endif %}>Este Mês</option>
+                        <option value="ano" {% if periodo == 'ano' %}selected{% endif %}>Este Ano</option>
+                        <option value="total" {% if periodo == 'total' %}selected{% endif %}>Todo o Período</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="voluntario_id" class="form-label fw-semibold">Voluntário</label>
+                    <select class="form-select" id="voluntario_id" name="voluntario_id">
+                        <option value="">Todos os Voluntários</option>
+                        {% for vol in voluntarios %}
+                        <option value="{{ vol.id }}" {% if voluntario_selecionado == vol.id|string %}selected{% endif %}>
+                            {{ vol.nome }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search"></i> Filtrar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm text-center">
+                <div class="card-body">
+                    <i class="bi bi-clock-history text-primary" style="font-size: 2.5rem;"></i>
+                    <h3 class="mt-3 mb-1 fw-bold">{{ "%.1f"|format(total_horas) }}</h3>
+                    <p class="text-muted mb-0">Total de Horas</p>
+                    <small class="text-muted">{{ titulo_periodo }}</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm text-center">
+                <div class="card-body">
+                    <i class="bi bi-file-earmark-text text-success" style="font-size: 2.5rem;"></i>
+                    <h3 class="mt-3 mb-1 fw-bold">{{ total_atuacoes }}</h3>
+                    <p class="text-muted mb-0">Atuações</p>
+                    <small class="text-muted">{{ titulo_periodo }}</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm text-center">
+                <div class="card-body">
+                    <i class="bi bi-heart-pulse text-danger" style="font-size: 2.5rem;"></i>
+                    <h3 class="mt-3 mb-1 fw-bold">{{ total_pacientes }}</h3>
+                    <p class="text-muted mb-0">Pacientes Atendidos</p>
+                    <small class="text-muted">{{ titulo_periodo }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="bi bi-people-fill text-info"></i> Pacientes por Faixa Etária
+                    </h5>
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Faixa Etária</th>
+                                    <th class="text-end">Feminino</th>
+                                    <th class="text-end">Masculino</th>
+                                    <th class="text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for faixa in ['0-3', '4-6', '7-9', '10-12', '13-15', '16-18'] %}
+                                <tr>
+                                    <td>{{ faixa }} anos</td>
+                                    <td class="text-end">{{ pacientes_por_faixa.get(faixa, {}).get('feminino', 0) }}</td>
+                                    <td class="text-end">{{ pacientes_por_faixa.get(faixa, {}).get('masculino', 0) }}</td>
+                                    <td class="text-end fw-semibold">
+                                        {{ pacientes_por_faixa.get(faixa, {}).get('feminino', 0) + pacientes_por_faixa.get(faixa, {}).get('masculino', 0) }}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="bi bi-book-fill text-warning"></i> Top 10 Livros Mais Contados
+                    </h5>
+                    <div class="list-group list-group-flush">
+                        {% if livros_ranking %}
+                            {% for livro in livros_ranking %}
+                            <div class="list-group-item px-0 border-0 d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                    <div class="fw-semibold">{{ livro.titulo }}</div>
+                                    <small class="text-muted">{{ livro.autor }}</small>
+                                </div>
+                                <span class="badge bg-warning rounded-pill">{{ livro.vezes }}x</span>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted mb-0">Nenhum livro registrado.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-3">
+                <i class="bi bi-geo-alt-fill text-danger"></i> Locais de Atendimento
+            </h5>
+            <div class="row">
+                {% for local, count in locais_contagem.items() %}
+                <div class="col-md-3 mb-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>{{ local }}</span>
+                        <span class="badge bg-secondary">{{ count }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title mb-3">
+                <i class="bi bi-list-ul text-primary"></i> Atuações Detalhadas
+            </h5>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Data</th>
+                            <th>Voluntário</th>
+                            <th>Período</th>
+                            <th>Duração</th>
+                            <th>Pacientes</th>
+                            <th>Livros</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if diarios %}
+                            {% for diario in diarios %}
+                            <tr>
+                                <td>{{ diario.data.strftime('%d/%m/%Y') }}</td>
+                                <td>{{ diario.voluntario.nome }}</td>
+                                <td>{{ diario.periodo }}</td>
+                                <td>{{ "%.1f"|format(diario.duracao) }}h</td>
+                                <td>
+                                    {% set total = namespace(value=0) %}
+                                    {% if diario.pacientes_atendidos %}
+                                        {% for faixa, dados in diario.pacientes_atendidos.items() %}
+                                            {% set total.value = total.value + dados.get('feminino', 0) + dados.get('masculino', 0) %}
+                                        {% endfor %}
+                                    {% endif %}
+                                    {{ total.value }}
+                                </td>
+                                <td>
+                                    {% if diario.livros_contados %}
+                                        {{ diario.livros_contados|length }}
+                                    {% else %}
+                                        0
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">
+                                    Nenhuma atuação encontrada para os filtros selecionados.
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

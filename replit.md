@@ -101,6 +101,23 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### November 19, 2025 - Admin Panel Implementation
+- Added comprehensive administrative panel with full system access
+- Admin panel features:
+  - ✅ Admin Dashboard: Overview statistics (total volunteers, hours, activities, patients)
+  - ✅ Monthly hours chart with all volunteer data
+  - ✅ Top 10 most active volunteers leaderboard
+  - ✅ User Management: List all volunteers with their statistics
+  - ✅ Create User: Form to add new volunteers or admins
+  - ✅ Delete User: Remove users and their associated activities
+  - ✅ Reports: Generate detailed reports with custom filters (period, volunteer)
+  - ✅ Detailed analytics: Patient demographics, book rankings, location usage
+  - ✅ Admin-only navigation menu visible only to administrators
+- Database schema updated:
+  - Added `is_admin` boolean field to Voluntario model
+  - Admin decorator for route protection
+  - Cascade delete for user activities
+
 ### November 19, 2025 - Initial Release
 - Complete implementation of volunteer activity tracking system
 - All core features implemented and tested:
@@ -116,10 +133,17 @@ Preferred communication style: Simple, everyday language.
   - ✅ Database seeded with sample data
 
 **Test Credentials**:
+
+Volunteer Account:
 - Email: voluntario@teste.com
 - Password: senha123
+
+Administrator Account:
+- Email: admin@teste.com
+- Password: admin123
 
 **Database Structure**:
 - PostgreSQL database with 4 main tables
 - All volunteer data persisted (authentication, activities, books, hospitals)
 - JSON fields for flexible patient demographics and location tracking
+- Admin users can manage all system data and generate reports
