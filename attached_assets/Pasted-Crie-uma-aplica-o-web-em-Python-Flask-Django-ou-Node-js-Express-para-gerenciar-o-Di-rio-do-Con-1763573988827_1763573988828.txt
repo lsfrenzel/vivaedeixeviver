@@ -1,0 +1,33 @@
+Crie uma aplicação web em Python (Flask/Django) ou Node.js (Express) para gerenciar o "Diário do Contador" da Associação Viva e Deixe Viver. O foco principal é a **otimização da experiência do voluntário** e a **captação eficiente de dados qualitativos e quantitativos** para o Balanço Social anual.
+
+**Requisitos Essenciais do Sistema:**
+
+1.  **Autenticação e Login:**
+    * Implementar um sistema de login simples (usuário/senha).
+    * Ao logar, o sistema deve reconhecer o usuário e pré-preencher: **Nome do Voluntário**, **Estado de Atuação Padrão** e **Hospital de Atuação Padrão**.
+
+2.  **Formulário de Atuação Otimizado ("Diário do Contador"):**
+    * **Data e Período (Pergunta 1 e 2):** Pré-preencher a data com a data atual. Campo simples para selecionar o período (**Manhã/Tarde/Noite**).
+    * **Duração (Pergunta 3):** Campo de entrada numérica para digitar a **quantidade de horas** (ex: `2` ou `2.5`).
+    * **Registro de Pacientes (Pergunta 4):** Criar uma seção repetível ou uma tabela simplificada para registrar o atendimento por faixa etária:
+        * **Faixas Etárias:** 0-3 anos, 4-6 anos, 7-9 anos, 10-12 anos, 13-15 anos, 16-18 anos.
+        * Para cada faixa, campos numéricos para **Feminino (qtd)** e **Masculino (qtd)**. O voluntário preenche "0" ou deixa vazio onde não atendeu.
+    * **Local de Atendimento (Pergunta 5):** Lista de *checkboxes* para selecionar as áreas no hospital (Ex: Leito, UTI, Pronto Socorro, Hemodiálise, etc.).
+    * **Livros Contados (Pergunta 6):**
+        * Campo de busca com função de **autocomplete/sugestão** para livros já registrados no banco de dados.
+        * Se o livro for selecionado, deve preencher automaticamente **Autor** e **Editora**.
+        * Se não for encontrado, permitir a entrada manual de **Nome do Livro**, **Autor** e **Editora** para cadastrar.
+    * **Relato Qualitativo (Pergunta 7):** Campo de texto longo para o relato da atuação, com foco em impacto e mudanças.
+
+3.  **Banco de Dados (Estrutura Mínima):**
+    * Tabela `Voluntarios`: (id, nome, email, senha, estado_padrao, hospital_padrao).
+    * Tabela `Hospitais`: (id, nome, estado).
+    * Tabela `Livros`: (id, titulo, autor, editora).
+    * Tabela `Diario`: (id, voluntario_id, data, duracao, pacientes_atendidos_json, local_atendimento_json, livros_contados_json, relato_qualitativo).
+
+**Funcionalidade Bônus (Opcional, mas Altamente Desejada):**
+
+* **Painel do Voluntário:** Após o preenchimento, redirecionar para uma tela que exibe uma **"Medalha de Atuação"** ou um **gráfico de barras simples** mostrando suas horas totais de voluntariado no mês/ano.
+
+**Foco de Desenvolvimento:**
+Use uma estrutura de código limpa e modular. Priorize a funcionalidade do formulário e a integração básica com o banco de dados. Não se preocupe com a complexidade do CSS/design, apenas que seja funcional e fácil de navegar (Mobile-friendly).
