@@ -101,6 +101,20 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### November 26, 2025 - Admin Panel Enhancement
+- Improved navigation menu with organized admin dropdown (Voluntários, Hospitais, Livros, Relatórios)
+- Full CRUD operations for volunteers with edit functionality
+- Hospital management: List, Create, Edit, Delete with state organization
+- Book catalog management: List, Create, Edit, Delete
+- Enhanced CSV export for reports with filters
+- Applied Viva e Deixe Viver visual identity across all admin templates:
+  - Color scheme: Green (#28a745), Red (#dc3545), Yellow (#ffc107)
+  - Consistent card styling with rounded corners and gradients
+  - Themed tables with hover effects
+  - Animated elements and visual feedback
+- Added validation for hospital_padrao_id to prevent FK constraint errors
+- Security improvements with proper authorization checks
+
 ### November 19, 2025 - Admin Panel Implementation
 - Added comprehensive administrative panel with full system access
 - Admin panel features:
