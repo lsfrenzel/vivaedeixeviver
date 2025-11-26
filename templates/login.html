@@ -2,38 +2,330 @@
 
 {% block title %}Login - Diário do Contador{% endblock %}
 
+{% block extra_css %}
+<style>
+    :root {
+        --viva-verde: #2E8B57;
+        --viva-verde-claro: #3CB371;
+        --viva-vermelho: #DC143C;
+        --viva-vermelho-claro: #FF6B6B;
+        --viva-amarelo: #FFD700;
+        --viva-amarelo-claro: #FFF8DC;
+    }
+    
+    body {
+        background: linear-gradient(135deg, var(--viva-verde-claro) 0%, var(--viva-amarelo-claro) 50%, var(--viva-vermelho-claro) 100%);
+        min-height: 100vh;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .floating-elements {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 0;
+        overflow: hidden;
+    }
+    
+    .star {
+        position: absolute;
+        font-size: 2rem;
+        animation: float 6s ease-in-out infinite;
+        opacity: 0.6;
+    }
+    
+    .star:nth-child(1) { top: 10%; left: 5%; animation-delay: 0s; color: var(--viva-amarelo); }
+    .star:nth-child(2) { top: 20%; left: 85%; animation-delay: 1s; color: var(--viva-vermelho); }
+    .star:nth-child(3) { top: 70%; left: 10%; animation-delay: 2s; color: var(--viva-verde); }
+    .star:nth-child(4) { top: 80%; left: 90%; animation-delay: 3s; color: var(--viva-amarelo); }
+    .star:nth-child(5) { top: 40%; left: 3%; animation-delay: 1.5s; color: var(--viva-vermelho); }
+    .star:nth-child(6) { top: 50%; left: 95%; animation-delay: 2.5s; color: var(--viva-verde); }
+    .star:nth-child(7) { top: 5%; left: 50%; animation-delay: 0.5s; color: var(--viva-amarelo); }
+    .star:nth-child(8) { top: 90%; left: 40%; animation-delay: 3.5s; color: var(--viva-vermelho); }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(10deg); }
+    }
+    
+    .login-container {
+        position: relative;
+        z-index: 10;
+    }
+    
+    .login-card {
+        background: white;
+        border-radius: 30px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        border: 4px solid var(--viva-amarelo);
+        overflow: hidden;
+        animation: slideUp 0.6s ease-out;
+    }
+    
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .login-header {
+        background: linear-gradient(135deg, var(--viva-verde) 0%, var(--viva-verde-claro) 100%);
+        padding: 2rem;
+        text-align: center;
+        position: relative;
+    }
+    
+    .login-header::after {
+        content: '';
+        position: absolute;
+        bottom: -20px;
+        left: 0;
+        width: 100%;
+        height: 40px;
+        background: white;
+        border-radius: 50% 50% 0 0;
+    }
+    
+    .logo-container {
+        background: white;
+        padding: 15px 20px;
+        border-radius: 20px;
+        display: inline-block;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .logo-container img {
+        max-height: 80px;
+        width: auto;
+    }
+    
+    .login-body {
+        padding: 2.5rem 2rem 2rem;
+    }
+    
+    .welcome-text {
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+    
+    .welcome-text h1 {
+        color: var(--viva-verde);
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .welcome-text p {
+        color: #666;
+        font-size: 1rem;
+    }
+    
+    .form-label {
+        color: var(--viva-verde);
+        font-weight: 600;
+        font-size: 0.95rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .form-label i {
+        color: var(--viva-vermelho);
+    }
+    
+    .form-control {
+        border: 3px solid #e0e0e0;
+        border-radius: 15px;
+        padding: 0.9rem 1.2rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        border-color: var(--viva-amarelo);
+        box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.2);
+    }
+    
+    .form-control::placeholder {
+        color: #aaa;
+    }
+    
+    .btn-login {
+        background: linear-gradient(135deg, var(--viva-vermelho) 0%, var(--viva-vermelho-claro) 100%);
+        border: none;
+        border-radius: 15px;
+        padding: 1rem;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: white;
+        width: 100%;
+        margin-top: 1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 20px rgba(220, 20, 60, 0.3);
+    }
+    
+    .btn-login:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(220, 20, 60, 0.4);
+        background: linear-gradient(135deg, var(--viva-vermelho-claro) 0%, var(--viva-vermelho) 100%);
+    }
+    
+    .btn-login:active {
+        transform: translateY(-1px);
+    }
+    
+    .btn-login i {
+        margin-left: 0.5rem;
+    }
+    
+    .demo-credentials {
+        text-align: center;
+        margin-top: 1.5rem;
+        padding: 1rem;
+        background: var(--viva-amarelo-claro);
+        border-radius: 15px;
+        border: 2px dashed var(--viva-amarelo);
+    }
+    
+    .demo-credentials p {
+        margin: 0;
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    .demo-credentials strong {
+        color: var(--viva-verde);
+    }
+    
+    .alert {
+        border-radius: 15px;
+        border: none;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .alert-danger {
+        background: rgba(220, 20, 60, 0.1);
+        color: var(--viva-vermelho);
+    }
+    
+    .decorative-books {
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 5px;
+    }
+    
+    .book-icon {
+        font-size: 1.5rem;
+        animation: bounce 2s ease-in-out infinite;
+    }
+    
+    .book-icon:nth-child(1) { color: var(--viva-vermelho); animation-delay: 0s; }
+    .book-icon:nth-child(2) { color: var(--viva-verde); animation-delay: 0.2s; }
+    .book-icon:nth-child(3) { color: var(--viva-amarelo); animation-delay: 0.4s; }
+    
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-5px); }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container">
+<div class="floating-elements">
+    <div class="star"><i class="bi bi-star-fill"></i></div>
+    <div class="star"><i class="bi bi-heart-fill"></i></div>
+    <div class="star"><i class="bi bi-book-fill"></i></div>
+    <div class="star"><i class="bi bi-star-fill"></i></div>
+    <div class="star"><i class="bi bi-heart-fill"></i></div>
+    <div class="star"><i class="bi bi-book-fill"></i></div>
+    <div class="star"><i class="bi bi-star-fill"></i></div>
+    <div class="star"><i class="bi bi-heart-fill"></i></div>
+</div>
+
+<div class="container login-container">
     <div class="row justify-content-center align-items-center min-vh-100">
-        <div class="col-md-5 col-lg-4">
-            <div class="card shadow-sm border-0">
-                <div class="card-body p-4">
-                    <div class="text-center mb-4">
-                        <i class="bi bi-book-half text-primary" style="font-size: 3rem;"></i>
-                        <h1 class="h3 mt-3 fw-semibold">Diário do Contador</h1>
-                        <p class="text-muted">Associação Viva e Deixe Viver</p>
+        <div class="col-11 col-sm-8 col-md-6 col-lg-5 col-xl-4">
+            <div class="login-card">
+                <div class="login-header">
+                    <div class="logo-container">
+                        <img src="{{ url_for('static', filename='logo.png') }}" alt="Viva e Deixe Viver">
                     </div>
+                </div>
+                
+                <div class="login-body">
+                    <div class="welcome-text">
+                        <h1><i class="bi bi-journal-bookmark-fill"></i> Diário do Contador</h1>
+                        <p>Entre para registrar suas leituras mágicas!</p>
+                    </div>
+                    
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ 'danger' if category == 'error' else category }}">
+                                    <i class="bi bi-exclamation-circle-fill me-2"></i>{{ message }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
                     
                     <form method="POST" action="{{ url_for('login') }}">
                         <div class="mb-3">
-                            <label for="email" class="form-label fw-medium">E-mail</label>
-                            <input type="email" class="form-control form-control-lg" id="email" name="email" required>
+                            <label for="email" class="form-label">
+                                <i class="bi bi-envelope-heart-fill"></i> E-mail
+                            </label>
+                            <input type="email" 
+                                   class="form-control" 
+                                   id="email" 
+                                   name="email" 
+                                   placeholder="seu@email.com"
+                                   autocomplete="email"
+                                   required>
                         </div>
                         
-                        <div class="mb-4">
-                            <label for="senha" class="form-label fw-medium">Senha</label>
-                            <input type="password" class="form-control form-control-lg" id="senha" name="senha" required>
+                        <div class="mb-3">
+                            <label for="senha" class="form-label">
+                                <i class="bi bi-key-fill"></i> Senha
+                            </label>
+                            <input type="password" 
+                                   class="form-control" 
+                                   id="senha" 
+                                   name="senha" 
+                                   placeholder="Digite sua senha"
+                                   autocomplete="current-password"
+                                   required>
                         </div>
                         
-                        <button type="submit" class="btn btn-primary btn-lg w-100 fw-semibold">
-                            Entrar
+                        <button type="submit" class="btn btn-login">
+                            Entrar <i class="bi bi-arrow-right-circle-fill"></i>
                         </button>
                     </form>
+                    
+                    <div class="demo-credentials">
+                        <p><i class="bi bi-info-circle-fill text-warning me-1"></i> 
+                           <strong>Voluntário:</strong> voluntario@teste.com / senha123</p>
+                        <p class="mt-1"><strong>Admin:</strong> admin@teste.com / admin123</p>
+                    </div>
                 </div>
             </div>
             
-            <div class="text-center mt-3 text-muted small">
-                <p>Use: voluntario@teste.com / senha123</p>
+            <div class="decorative-books">
+                <span class="book-icon"><i class="bi bi-book-fill"></i></span>
+                <span class="book-icon"><i class="bi bi-book-fill"></i></span>
+                <span class="book-icon"><i class="bi bi-book-fill"></i></span>
             </div>
         </div>
     </div>
