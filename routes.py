@@ -337,11 +337,17 @@ def admin_criar_usuario():
             flash('Já existe um usuário com este e-mail.', 'error')
             return redirect(url_for('admin_criar_usuario'))
         
+        validated_hospital_id = None
+        if hospital_padrao_id:
+            hospital = Hospital.query.get(int(hospital_padrao_id))
+            if hospital:
+                validated_hospital_id = hospital.id
+        
         novo_voluntario = Voluntario(
             nome=nome,
             email=email,
             estado_padrao=estado_padrao if estado_padrao else None,
-            hospital_padrao_id=int(hospital_padrao_id) if hospital_padrao_id else None,
+            hospital_padrao_id=validated_hospital_id,
             is_admin=is_admin
         )
         novo_voluntario.set_senha(senha)
@@ -380,6 +386,268 @@ def admin_excluir_usuario(usuario_id):
     
     flash(f'Usuário {voluntario.nome} excluído com sucesso.', 'success')
     return redirect(url_for('admin_usuarios'))
+
+
+@app.route('/admin/usuarios/editar/<int:usuario_id>', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_editar_usuario(usuario_id):
+    voluntario = Voluntario.query.get_or_404(usuario_id)
+    
+    if request.method == 'POST':
+        nome = request.form.get('nome')
+        email = request.form.get('email')
+        nova_senha = request.form.get('nova_senha')
+        estado_padrao = request.form.get('estado_padrao')
+        hospital_padrao_id = request.form.get('hospital_padrao_id')
+        is_admin = request.form.get('is_admin') == 'on'
+        
+        if not nome or not email:
+            flash('Nome e email são obrigatórios.', 'error')
+            return redirect(url_for('admin_editar_usuario', usuario_id=usuario_id))
+        
+        existente = Voluntario.query.filter(Voluntario.email == email, Voluntario.id != usuario_id).first()
+        if existente:
+            flash('Já existe outro usuário com este e-mail.', 'error')
+            return redirect(url_for('admin_editar_usuario', usuario_id=usuario_id))
+        
+        if voluntario.is_admin and not is_admin:
+            admin_count = Voluntario.query.filter_by(is_admin=True).count()
+            if admin_count <= 1:
+                flash('Não é possível remover o privilégio de administrador do último admin.', 'error')
+                return redirect(url_for('admin_editar_usuario', usuario_id=usuario_id))
+        
+        voluntario.nome = nome
+        voluntario.email = email
+        voluntario.estado_padrao = estado_padrao if estado_padrao else None
+        
+        if hospital_padrao_id:
+            hospital = Hospital.query.get(int(hospital_padrao_id))
+            if hospital:
+                voluntario.hospital_padrao_id = hospital.id
+            else:
+                voluntario.hospital_padrao_id = None
+        else:
+            voluntario.hospital_padrao_id = None
+        
+        voluntario.is_admin = is_admin
+        
+        if nova_senha:
+            voluntario.set_senha(nova_senha)
+        
+        db.session.commit()
+        flash(f'Usuário {nome} atualizado com sucesso!', 'success')
+        return redirect(url_for('admin_usuarios'))
+    
+    hospitais = Hospital.query.order_by(Hospital.estado, Hospital.nome).all()
+    estados = db.session.query(Hospital.estado).distinct().order_by(Hospital.estado).all()
+    estados = [e[0] for e in estados]
+    
+    return render_template('admin_editar_usuario.html', voluntario=voluntario, hospitais=hospitais, estados=estados)
+
+
+@app.route('/admin/hospitais')
+@login_required
+@admin_required
+def admin_hospitais():
+    hospitais = Hospital.query.order_by(Hospital.estado, Hospital.nome).all()
+    return render_template('admin_hospitais.html', hospitais=hospitais)
+
+
+@app.route('/admin/hospitais/criar', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_criar_hospital():
+    if request.method == 'POST':
+        nome = request.form.get('nome')
+        estado = request.form.get('estado')
+        
+        if not nome or not estado:
+            flash('Nome e estado são obrigatórios.', 'error')
+            return redirect(url_for('admin_criar_hospital'))
+        
+        hospital = Hospital(nome=nome, estado=estado.upper())
+        db.session.add(hospital)
+        db.session.commit()
+        
+        flash(f'Hospital {nome} criado com sucesso!', 'success')
+        return redirect(url_for('admin_hospitais'))
+    
+    estados_brasil = ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO']
+    return render_template('admin_criar_hospital.html', estados=estados_brasil)
+
+
+@app.route('/admin/hospitais/editar/<int:hospital_id>', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_editar_hospital(hospital_id):
+    hospital = Hospital.query.get_or_404(hospital_id)
+    
+    if request.method == 'POST':
+        nome = request.form.get('nome')
+        estado = request.form.get('estado')
+        
+        if not nome or not estado:
+            flash('Nome e estado são obrigatórios.', 'error')
+            return redirect(url_for('admin_editar_hospital', hospital_id=hospital_id))
+        
+        hospital.nome = nome
+        hospital.estado = estado.upper()
+        db.session.commit()
+        
+        flash(f'Hospital {nome} atualizado com sucesso!', 'success')
+        return redirect(url_for('admin_hospitais'))
+    
+    estados_brasil = ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO']
+    return render_template('admin_editar_hospital.html', hospital=hospital, estados=estados_brasil)
+
+
+@app.route('/admin/hospitais/excluir/<int:hospital_id>', methods=['POST'])
+@login_required
+@admin_required
+def admin_excluir_hospital(hospital_id):
+    hospital = Hospital.query.get_or_404(hospital_id)
+    
+    voluntarios_vinculados = Voluntario.query.filter_by(hospital_padrao_id=hospital_id).count()
+    if voluntarios_vinculados > 0:
+        flash(f'Não é possível excluir. Existem {voluntarios_vinculados} voluntário(s) vinculado(s) a este hospital.', 'error')
+        return redirect(url_for('admin_hospitais'))
+    
+    db.session.delete(hospital)
+    db.session.commit()
+    
+    flash(f'Hospital {hospital.nome} excluído com sucesso.', 'success')
+    return redirect(url_for('admin_hospitais'))
+
+
+@app.route('/admin/livros')
+@login_required
+@admin_required
+def admin_livros():
+    livros = Livro.query.order_by(Livro.titulo).all()
+    return render_template('admin_livros.html', livros=livros)
+
+
+@app.route('/admin/livros/criar', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_criar_livro():
+    if request.method == 'POST':
+        titulo = request.form.get('titulo')
+        autor = request.form.get('autor')
+        editora = request.form.get('editora')
+        
+        if not titulo:
+            flash('Título é obrigatório.', 'error')
+            return redirect(url_for('admin_criar_livro'))
+        
+        livro = Livro(titulo=titulo, autor=autor, editora=editora)
+        db.session.add(livro)
+        db.session.commit()
+        
+        flash(f'Livro "{titulo}" adicionado com sucesso!', 'success')
+        return redirect(url_for('admin_livros'))
+    
+    return render_template('admin_criar_livro.html')
+
+
+@app.route('/admin/livros/editar/<int:livro_id>', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_editar_livro(livro_id):
+    livro = Livro.query.get_or_404(livro_id)
+    
+    if request.method == 'POST':
+        titulo = request.form.get('titulo')
+        autor = request.form.get('autor')
+        editora = request.form.get('editora')
+        
+        if not titulo:
+            flash('Título é obrigatório.', 'error')
+            return redirect(url_for('admin_editar_livro', livro_id=livro_id))
+        
+        livro.titulo = titulo
+        livro.autor = autor
+        livro.editora = editora
+        db.session.commit()
+        
+        flash(f'Livro "{titulo}" atualizado com sucesso!', 'success')
+        return redirect(url_for('admin_livros'))
+    
+    return render_template('admin_editar_livro.html', livro=livro)
+
+
+@app.route('/admin/livros/excluir/<int:livro_id>', methods=['POST'])
+@login_required
+@admin_required
+def admin_excluir_livro(livro_id):
+    livro = Livro.query.get_or_404(livro_id)
+    
+    db.session.delete(livro)
+    db.session.commit()
+    
+    flash(f'Livro "{livro.titulo}" excluído com sucesso.', 'success')
+    return redirect(url_for('admin_livros'))
+
+
+@app.route('/admin/relatorios/exportar')
+@login_required
+@admin_required
+def admin_exportar_relatorio():
+    import csv
+    from io import StringIO
+    from flask import Response
+    
+    periodo = request.args.get('periodo', 'mes')
+    voluntario_id = request.args.get('voluntario_id', '')
+    
+    hoje = datetime.now()
+    
+    if periodo == 'mes':
+        inicio = hoje.replace(day=1)
+    elif periodo == 'ano':
+        inicio = hoje.replace(month=1, day=1)
+    else:
+        inicio = datetime(2000, 1, 1)
+    
+    query = Diario.query.filter(Diario.data >= inicio)
+    
+    if voluntario_id:
+        query = query.filter(Diario.voluntario_id == int(voluntario_id))
+    
+    diarios = query.order_by(Diario.data.desc()).all()
+    
+    output = StringIO()
+    writer = csv.writer(output)
+    
+    writer.writerow(['Data', 'Voluntário', 'Período', 'Duração (h)', 'Total Pacientes', 'Livros Contados', 'Locais'])
+    
+    for diario in diarios:
+        total_pacientes = 0
+        if diario.pacientes_atendidos:
+            for faixa, dados in diario.pacientes_atendidos.items():
+                total_pacientes += dados.get('feminino', 0) + dados.get('masculino', 0)
+        
+        livros = len(diario.livros_contados) if diario.livros_contados else 0
+        locais = ', '.join(diario.locais_atendimento) if diario.locais_atendimento else ''
+        
+        writer.writerow([
+            diario.data.strftime('%d/%m/%Y'),
+            diario.voluntario.nome,
+            diario.periodo,
+            f'{diario.duracao:.1f}',
+            total_pacientes,
+            livros,
+            locais
+        ])
+    
+    output.seek(0)
+    
+    return Response(
+        output.getvalue(),
+        mimetype='text/csv',
+        headers={'Content-Disposition': f'attachment; filename=relatorio_atuacoes_{hoje.strftime("%Y%m%d")}.csv'}
+    )
 
 
 @app.route('/admin/relatorios')

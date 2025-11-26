@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Novo Voluntário - Diário do Contador{% endblock %}
+{% block title %}Editar Usuário - Diário do Contador{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -67,9 +67,12 @@
                 <a href="{{ url_for('admin_usuarios') }}" class="btn btn-light btn-sm me-3">
                     <i class="bi bi-arrow-left"></i>
                 </a>
-                <h1 class="h4 mb-0 fw-bold">
-                    <i class="bi bi-person-plus-fill"></i> Novo Voluntário
-                </h1>
+                <div>
+                    <h1 class="h4 mb-0 fw-bold">
+                        <i class="bi bi-person-gear"></i> Editar Usuário
+                    </h1>
+                    <small class="opacity-75">{{ voluntario.email }}</small>
+                </div>
             </div>
 
             <div class="card admin-form-card shadow-sm">
@@ -80,7 +83,7 @@
                                 <i class="bi bi-person-fill text-danger me-1"></i> Nome Completo *
                             </label>
                             <input type="text" class="form-control form-control-lg" id="nome" name="nome" 
-                                   placeholder="Digite o nome completo" required>
+                                   value="{{ voluntario.nome }}" required>
                         </div>
 
                         <div class="mb-3">
@@ -88,15 +91,16 @@
                                 <i class="bi bi-envelope-fill text-danger me-1"></i> E-mail *
                             </label>
                             <input type="email" class="form-control form-control-lg" id="email" name="email" 
-                                   placeholder="email@exemplo.com" required>
+                                   value="{{ voluntario.email }}" required>
                         </div>
 
                         <div class="mb-3">
-                            <label for="senha" class="form-label">
-                                <i class="bi bi-key-fill text-warning me-1"></i> Senha *
+                            <label for="nova_senha" class="form-label">
+                                <i class="bi bi-key-fill text-warning me-1"></i> Nova Senha
                             </label>
-                            <input type="password" class="form-control form-control-lg" id="senha" name="senha" 
-                                   placeholder="Digite uma senha segura" required>
+                            <input type="password" class="form-control form-control-lg" id="nova_senha" name="nova_senha"
+                                   placeholder="Deixe em branco para manter a senha atual">
+                            <small class="text-muted">Preencha apenas se desejar alterar a senha.</small>
                         </div>
 
                         <div class="row">
@@ -107,7 +111,9 @@
                                 <select class="form-select form-select-lg" id="estado_padrao" name="estado_padrao">
                                     <option value="">Selecione um estado</option>
                                     {% for estado in estados %}
-                                    <option value="{{ estado }}">{{ estado }}</option>
+                                    <option value="{{ estado }}" {% if voluntario.estado_padrao == estado %}selected{% endif %}>
+                                        {{ estado }}
+                                    </option>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -119,7 +125,9 @@
                                 <select class="form-select form-select-lg" id="hospital_padrao_id" name="hospital_padrao_id">
                                     <option value="">Selecione um hospital</option>
                                     {% for hospital in hospitais %}
-                                    <option value="{{ hospital.id }}">{{ hospital.nome }} ({{ hospital.estado }})</option>
+                                    <option value="{{ hospital.id }}" {% if voluntario.hospital_padrao_id == hospital.id %}selected{% endif %}>
+                                        {{ hospital.nome }} ({{ hospital.estado }})
+                                    </option>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -127,18 +135,19 @@
 
                         <div class="mb-4 p-3 rounded" style="background: var(--viva-amarelo-claro);">
                             <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="is_admin" name="is_admin">
+                                <input class="form-check-input" type="checkbox" id="is_admin" name="is_admin"
+                                       {% if voluntario.is_admin %}checked{% endif %}>
                                 <label class="form-check-label fw-semibold" for="is_admin">
                                     <i class="bi bi-shield-check text-warning me-1"></i>
                                     Conceder privilégios de administrador
                                 </label>
                             </div>
-                            <small class="text-muted">Administradores têm acesso completo ao sistema, incluindo gerenciamento de usuários.</small>
+                            <small class="text-muted">Administradores têm acesso completo ao sistema.</small>
                         </div>
 
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-save btn-lg text-white">
-                                <i class="bi bi-check-circle-fill"></i> Criar Voluntário
+                                <i class="bi bi-check-circle-fill"></i> Salvar Alterações
                             </button>
                             <a href="{{ url_for('admin_usuarios') }}" class="btn btn-back btn-lg">
                                 Cancelar

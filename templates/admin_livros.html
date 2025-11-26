@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block title %}Gerenciar Livros - Diário do Contador{% endblock %}
+
+{% block extra_css %}
+<style>
+    .admin-header {
+        background: linear-gradient(135deg, var(--viva-verde) 0%, var(--viva-verde-claro) 100%);
+        color: white;
+        border-radius: 20px;
+        padding: 1.5rem 2rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .btn-add {
+        background: linear-gradient(135deg, var(--viva-vermelho) 0%, var(--viva-vermelho-claro) 100%);
+        border: none;
+        border-radius: 15px;
+        padding: 0.6rem 1.5rem;
+        font-weight: 600;
+    }
+    
+    .btn-add:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(220, 20, 60, 0.3);
+    }
+    
+    .table-card {
+        border-radius: 25px !important;
+        border: none !important;
+        overflow: hidden;
+    }
+    
+    .table thead {
+        background: linear-gradient(135deg, var(--viva-verde-claro) 0%, var(--viva-verde) 100%);
+        color: white;
+    }
+    
+    .table thead th {
+        border: none;
+        padding: 1rem;
+        font-weight: 600;
+    }
+    
+    .table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+    }
+    
+    .table tbody tr:hover {
+        background-color: var(--viva-amarelo-claro);
+    }
+    
+    .book-title {
+        color: var(--viva-verde);
+        font-weight: 600;
+    }
+    
+    .book-author {
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    .btn-edit {
+        background: var(--viva-amarelo);
+        border: none;
+        color: #333;
+        border-radius: 10px;
+    }
+    
+    .btn-edit:hover {
+        background: var(--viva-laranja);
+        color: white;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        color: var(--viva-amarelo);
+        opacity: 0.5;
+    }
+    
+    .search-box {
+        background: white;
+        border-radius: 15px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .search-box input {
+        border-radius: 10px;
+        border: 2px solid #e0e0e0;
+    }
+    
+    .search-box input:focus {
+        border-color: var(--viva-verde);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="admin-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <h1 class="h3 mb-0 fw-bold">
+                <i class="bi bi-book-fill"></i> Catálogo de Livros
+            </h1>
+            <small class="opacity-75">{{ livros|length }} livro(s) cadastrado(s)</small>
+        </div>
+        <a href="{{ url_for('admin_criar_livro') }}" class="btn btn-add text-white">
+            <i class="bi bi-plus-circle-fill"></i> Novo Livro
+        </a>
+    </div>
+
+    <div class="search-box">
+        <input type="text" id="searchLivros" class="form-control" placeholder="Buscar livros por título, autor ou editora...">
+    </div>
+
+    <div class="card table-card shadow">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" id="tabelaLivros">
+                    <thead>
+                        <tr>
+                            <th class="px-4"><i class="bi bi-book me-2"></i>Título</th>
+                            <th><i class="bi bi-person me-2"></i>Autor</th>
+                            <th><i class="bi bi-building me-2"></i>Editora</th>
+                            <th class="text-end px-4">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if livros %}
+                            {% for livro in livros %}
+                            <tr class="livro-row">
+                                <td class="px-4">
+                                    <i class="bi bi-journal-bookmark-fill text-warning me-2"></i>
+                                    <span class="book-title">{{ livro.titulo }}</span>
+                                </td>
+                                <td class="book-author">{{ livro.autor or '-' }}</td>
+                                <td>{{ livro.editora or '-' }}</td>
+                                <td class="text-end px-4">
+                                    <a href="{{ url_for('admin_editar_livro', livro_id=livro.id) }}" 
+                                       class="btn btn-sm btn-edit me-1">
+                                        <i class="bi bi-pencil-fill"></i>
+                                    </a>
+                                    <form method="POST" action="{{ url_for('admin_excluir_livro', livro_id=livro.id) }}" 
+                                          style="display: inline;" 
+                                          onsubmit="return confirm('Tem certeza que deseja excluir o livro {{ livro.titulo }}?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-trash-fill"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr id="emptyRow">
+                                <td colspan="4">
+                                    <div class="empty-state">
+                                        <i class="bi bi-book"></i>
+                                        <h5 class="mt-3 text-muted">Nenhum livro cadastrado</h5>
+                                        <p class="text-muted">Clique em "Novo Livro" para adicionar.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('searchLivros').addEventListener('input', function() {
+    const searchTerm = this.value.toLowerCase();
+    const rows = document.querySelectorAll('.livro-row');
+    
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(searchTerm) ? '' : 'none';
+    });
+});
+</script>
+{% endblock %}

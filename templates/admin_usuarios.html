@@ -1,29 +1,131 @@
 {% extends "base.html" %}
 
-{% block title %}Gerenciar Usuários - Diário do Contador{% endblock %}
+{% block title %}Gerenciar Voluntários - Diário do Contador{% endblock %}
+
+{% block extra_css %}
+<style>
+    .admin-header {
+        background: linear-gradient(135deg, var(--viva-verde) 0%, var(--viva-verde-claro) 100%);
+        color: white;
+        border-radius: 20px;
+        padding: 1.5rem 2rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .btn-add {
+        background: linear-gradient(135deg, var(--viva-vermelho) 0%, var(--viva-vermelho-claro) 100%);
+        border: none;
+        border-radius: 15px;
+        padding: 0.6rem 1.5rem;
+        font-weight: 600;
+    }
+    
+    .btn-add:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(220, 20, 60, 0.3);
+    }
+    
+    .table-card {
+        border-radius: 25px !important;
+        border: none !important;
+        overflow: hidden;
+    }
+    
+    .table thead {
+        background: linear-gradient(135deg, var(--viva-verde-claro) 0%, var(--viva-verde) 100%);
+        color: white;
+    }
+    
+    .table thead th {
+        border: none;
+        padding: 1rem;
+        font-weight: 600;
+    }
+    
+    .table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+    }
+    
+    .table tbody tr:hover {
+        background-color: var(--viva-amarelo-claro);
+    }
+    
+    .badge-admin {
+        background: linear-gradient(135deg, var(--viva-amarelo) 0%, var(--viva-laranja) 100%);
+        color: #333;
+        font-weight: 600;
+        padding: 0.3rem 0.6rem;
+        border-radius: 8px;
+    }
+    
+    .badge-horas {
+        background: linear-gradient(135deg, var(--viva-verde) 0%, var(--viva-verde-claro) 100%);
+        color: white;
+        font-weight: 600;
+        padding: 0.4rem 0.8rem;
+        border-radius: 10px;
+    }
+    
+    .btn-edit {
+        background: var(--viva-amarelo);
+        border: none;
+        color: #333;
+        border-radius: 10px;
+    }
+    
+    .btn-edit:hover {
+        background: var(--viva-laranja);
+        color: white;
+    }
+    
+    .user-name {
+        font-weight: 600;
+        color: var(--viva-verde);
+    }
+    
+    .user-email {
+        font-size: 0.85rem;
+        color: #666;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        color: var(--viva-verde-claro);
+        opacity: 0.5;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 fw-semibold">
-            <i class="bi bi-people-fill text-primary"></i> Gerenciar Usuários
-        </h1>
-        <a href="{{ url_for('admin_criar_usuario') }}" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> Novo Usuário
+    <div class="admin-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <h1 class="h3 mb-0 fw-bold">
+                <i class="bi bi-people-fill"></i> Gerenciar Voluntários
+            </h1>
+            <small class="opacity-75">{{ usuarios_stats|length }} voluntário(s) cadastrado(s)</small>
+        </div>
+        <a href="{{ url_for('admin_criar_usuario') }}" class="btn btn-add text-white">
+            <i class="bi bi-person-plus-fill"></i> Novo Voluntário
         </a>
     </div>
 
-    <div class="card border-0 shadow-sm">
+    <div class="card table-card shadow">
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover mb-0">
-                    <thead class="table-light">
+                    <thead>
                         <tr>
-                            <th class="px-4">Nome</th>
-                            <th>E-mail</th>
-                            <th>Total de Horas</th>
-                            <th>Atuações</th>
-                            <th>Última Atuação</th>
+                            <th class="px-4"><i class="bi bi-person me-2"></i>Voluntário</th>
+                            <th><i class="bi bi-clock me-2"></i>Horas</th>
+                            <th><i class="bi bi-journal me-2"></i>Atuações</th>
+                            <th><i class="bi bi-calendar me-2"></i>Última Atuação</th>
                             <th class="text-end px-4">Ações</th>
                         </tr>
                     </thead>
@@ -32,32 +134,56 @@
                             {% for user_stat in usuarios_stats %}
                             <tr>
                                 <td class="px-4">
-                                    <i class="bi bi-person-circle text-muted"></i> {{ user_stat.voluntario.nome }}
-                                    {% if user_stat.voluntario.is_admin %}
-                                        <span class="badge bg-warning text-dark ms-2">
-                                            <i class="bi bi-shield-check"></i> Admin
-                                        </span>
-                                    {% endif %}
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-3" style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--viva-verde-claro), var(--viva-verde)); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                                            {{ user_stat.voluntario.nome[0]|upper }}
+                                        </div>
+                                        <div>
+                                            <div class="user-name">
+                                                {{ user_stat.voluntario.nome }}
+                                                {% if user_stat.voluntario.is_admin %}
+                                                    <span class="badge-admin ms-2">
+                                                        <i class="bi bi-shield-check"></i> Admin
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                            <div class="user-email">{{ user_stat.voluntario.email }}</div>
+                                        </div>
+                                    </div>
                                 </td>
-                                <td>{{ user_stat.voluntario.email }}</td>
                                 <td>
-                                    <span class="badge bg-success">{{ "%.1f"|format(user_stat.total_horas) }}h</span>
+                                    <span class="badge-horas">{{ "%.1f"|format(user_stat.total_horas) }}h</span>
                                 </td>
-                                <td>{{ user_stat.total_atuacoes }}</td>
+                                <td>
+                                    <span class="badge bg-secondary rounded-pill">{{ user_stat.total_atuacoes }}</span>
+                                </td>
                                 <td>
                                     {% if user_stat.ultima_atuacao %}
-                                        {{ user_stat.ultima_atuacao.strftime('%d/%m/%Y') }}
+                                        <span class="text-success">
+                                            <i class="bi bi-check-circle me-1"></i>
+                                            {{ user_stat.ultima_atuacao.strftime('%d/%m/%Y') }}
+                                        </span>
                                     {% else %}
-                                        <span class="text-muted">Nunca</span>
+                                        <span class="text-muted">
+                                            <i class="bi bi-dash-circle me-1"></i>Nunca
+                                        </span>
                                     {% endif %}
                                 </td>
                                 <td class="text-end px-4">
                                     {% if user_stat.voluntario.id == current_user.id %}
-                                        <span class="text-muted small">Você</span>
+                                        <span class="badge bg-info text-white">
+                                            <i class="bi bi-person-check"></i> Você
+                                        </span>
                                     {% else %}
-                                        <form method="POST" action="{{ url_for('admin_excluir_usuario', usuario_id=user_stat.voluntario.id) }}" style="display: inline;" onsubmit="return confirm('Tem certeza que deseja excluir o usuário {{ user_stat.voluntario.nome }}? Todas as suas atuações também serão excluídas.');">
-                                            <button type="submit" class="btn btn-sm btn-outline-danger">
-                                                <i class="bi bi-trash"></i> Excluir
+                                        <a href="{{ url_for('admin_editar_usuario', usuario_id=user_stat.voluntario.id) }}" 
+                                           class="btn btn-sm btn-edit me-1" title="Editar">
+                                            <i class="bi bi-pencil-fill"></i>
+                                        </a>
+                                        <form method="POST" action="{{ url_for('admin_excluir_usuario', usuario_id=user_stat.voluntario.id) }}" 
+                                              style="display: inline;" 
+                                              onsubmit="return confirm('Tem certeza que deseja excluir o voluntário {{ user_stat.voluntario.nome }}?\n\nTodas as atuações também serão excluídas.');">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir">
+                                                <i class="bi bi-trash-fill"></i>
                                             </button>
                                         </form>
                                     {% endif %}
@@ -66,8 +192,12 @@
                             {% endfor %}
                         {% else %}
                             <tr>
-                                <td colspan="6" class="text-center text-muted py-4">
-                                    Nenhum usuário cadastrado ainda.
+                                <td colspan="5">
+                                    <div class="empty-state">
+                                        <i class="bi bi-people"></i>
+                                        <h5 class="mt-3 text-muted">Nenhum voluntário cadastrado</h5>
+                                        <p class="text-muted">Clique em "Novo Voluntário" para adicionar.</p>
+                                    </div>
                                 </td>
                             </tr>
                         {% endif %}

@@ -41,9 +41,17 @@
                             <li><a class="dropdown-item" href="{{ url_for('admin_dashboard') }}">
                                 <i class="bi bi-speedometer2"></i> Painel Admin
                             </a></li>
+                            <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{{ url_for('admin_usuarios') }}">
-                                <i class="bi bi-people"></i> Gerenciar Usuários
+                                <i class="bi bi-people"></i> Voluntários
                             </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('admin_hospitais') }}">
+                                <i class="bi bi-hospital"></i> Hospitais
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('admin_livros') }}">
+                                <i class="bi bi-book"></i> Livros
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{{ url_for('admin_relatorios') }}">
                                 <i class="bi bi-file-earmark-bar-graph"></i> Relatórios
                             </a></li>

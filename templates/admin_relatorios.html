@@ -2,16 +2,123 @@
 
 {% block title %}Relatórios - Diário do Contador{% endblock %}
 
+{% block extra_css %}
+<style>
+    .admin-header {
+        background: linear-gradient(135deg, var(--viva-verde) 0%, var(--viva-verde-claro) 100%);
+        color: white;
+        border-radius: 20px;
+        padding: 1.5rem 2rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .filter-card {
+        border-radius: 20px !important;
+        border: 3px solid var(--viva-amarelo-claro) !important;
+    }
+    
+    .stat-box {
+        border-radius: 20px;
+        padding: 1.5rem;
+        text-align: center;
+        transition: transform 0.3s ease;
+    }
+    
+    .stat-box:hover {
+        transform: translateY(-3px);
+    }
+    
+    .stat-box.verde { background: linear-gradient(135deg, var(--viva-verde), var(--viva-verde-claro)); color: white; }
+    .stat-box.amarelo { background: linear-gradient(135deg, var(--viva-laranja), var(--viva-amarelo)); color: #333; }
+    .stat-box.vermelho { background: linear-gradient(135deg, var(--viva-vermelho), var(--viva-vermelho-claro)); color: white; }
+    
+    .stat-box i { font-size: 2rem; opacity: 0.9; }
+    .stat-box h3 { font-size: 2rem; font-weight: 800; margin: 0.5rem 0; }
+    
+    .data-card {
+        border-radius: 20px !important;
+        border: 2px solid #f0f0f0 !important;
+    }
+    
+    .data-card .card-title {
+        color: var(--viva-verde);
+        font-weight: 700;
+    }
+    
+    .table thead {
+        background: var(--viva-amarelo-claro);
+    }
+    
+    .table thead th {
+        color: var(--viva-verde);
+        font-weight: 600;
+        border: none;
+    }
+    
+    .btn-export {
+        background: linear-gradient(135deg, var(--viva-verde) 0%, var(--viva-verde-claro) 100%);
+        border: none;
+        border-radius: 12px;
+        color: white;
+        font-weight: 600;
+    }
+    
+    .btn-export:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(46, 139, 87, 0.3);
+        color: white;
+    }
+    
+    .btn-filter {
+        background: linear-gradient(135deg, var(--viva-vermelho) 0%, var(--viva-vermelho-claro) 100%);
+        border: none;
+        border-radius: 12px;
+        color: white;
+        font-weight: 600;
+    }
+    
+    .form-select, .form-control {
+        border-radius: 12px;
+        border: 2px solid #e0e0e0;
+    }
+    
+    .form-select:focus, .form-control:focus {
+        border-color: var(--viva-verde);
+    }
+    
+    .local-badge {
+        background: var(--viva-amarelo-claro);
+        color: var(--viva-laranja);
+        border-radius: 10px;
+        padding: 0.3rem 0.8rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container py-4">
-    <h1 class="h3 fw-semibold mb-4">
-        <i class="bi bi-file-earmark-bar-graph text-primary"></i> Relatórios
-    </h1>
+    <div class="admin-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <h1 class="h3 mb-0 fw-bold">
+                <i class="bi bi-file-earmark-bar-graph-fill"></i> Relatórios
+            </h1>
+            <small class="opacity-75">{{ titulo_periodo }}</small>
+        </div>
+        <a href="{{ url_for('admin_exportar_relatorio', periodo=periodo, voluntario_id=voluntario_selecionado) }}" 
+           class="btn btn-export">
+            <i class="bi bi-download me-2"></i> Exportar CSV
+        </a>
+    </div>
 
-    <div class="card border-0 shadow-sm mb-4">
-        <div class="card-body">
-            <h5 class="card-title mb-3">Filtros</h5>
-            <form method="GET" class="row g-3">
+    <div class="card filter-card shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h5 class="card-title mb-3 fw-bold" style="color: var(--viva-verde);">
+                <i class="bi bi-funnel-fill me-2"></i> Filtros
+            </h5>
+            <form method="GET" class="row g-3 align-items-end">
                 <div class="col-md-4">
                     <label for="periodo" class="form-label fw-semibold">Período</label>
                     <select class="form-select" id="periodo" name="periodo">
@@ -20,7 +127,7 @@
                         <option value="total" {% if periodo == 'total' %}selected{% endif %}>Todo o Período</option>
                     </select>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-5">
                     <label for="voluntario_id" class="form-label fw-semibold">Voluntário</label>
                     <select class="form-select" id="voluntario_id" name="voluntario_id">
                         <option value="">Todos os Voluntários</option>
@@ -31,9 +138,9 @@
                         {% endfor %}
                     </select>
                 </div>
-                <div class="col-md-2 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="bi bi-search"></i> Filtrar
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-filter w-100">
+                        <i class="bi bi-search me-2"></i> Filtrar
                     </button>
                 </div>
             </form>
@@ -42,47 +149,38 @@
 
     <div class="row g-4 mb-4">
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm text-center">
-                <div class="card-body">
-                    <i class="bi bi-clock-history text-primary" style="font-size: 2.5rem;"></i>
-                    <h3 class="mt-3 mb-1 fw-bold">{{ "%.1f"|format(total_horas) }}</h3>
-                    <p class="text-muted mb-0">Total de Horas</p>
-                    <small class="text-muted">{{ titulo_periodo }}</small>
-                </div>
+            <div class="stat-box verde shadow">
+                <i class="bi bi-clock-history"></i>
+                <h3>{{ "%.1f"|format(total_horas) }}</h3>
+                <p class="mb-0 opacity-75">Total de Horas</p>
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm text-center">
-                <div class="card-body">
-                    <i class="bi bi-file-earmark-text text-success" style="font-size: 2.5rem;"></i>
-                    <h3 class="mt-3 mb-1 fw-bold">{{ total_atuacoes }}</h3>
-                    <p class="text-muted mb-0">Atuações</p>
-                    <small class="text-muted">{{ titulo_periodo }}</small>
-                </div>
+            <div class="stat-box amarelo shadow">
+                <i class="bi bi-journal-check"></i>
+                <h3>{{ total_atuacoes }}</h3>
+                <p class="mb-0">Atuações</p>
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm text-center">
-                <div class="card-body">
-                    <i class="bi bi-heart-pulse text-danger" style="font-size: 2.5rem;"></i>
-                    <h3 class="mt-3 mb-1 fw-bold">{{ total_pacientes }}</h3>
-                    <p class="text-muted mb-0">Pacientes Atendidos</p>
-                    <small class="text-muted">{{ titulo_periodo }}</small>
-                </div>
+            <div class="stat-box vermelho shadow">
+                <i class="bi bi-heart-pulse-fill"></i>
+                <h3>{{ total_pacientes }}</h3>
+                <p class="mb-0 opacity-75">Pacientes Atendidos</p>
             </div>
         </div>
     </div>
 
     <div class="row g-4 mb-4">
         <div class="col-md-6">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
+            <div class="card data-card shadow-sm h-100">
+                <div class="card-body p-4">
                     <h5 class="card-title mb-3">
-                        <i class="bi bi-people-fill text-info"></i> Pacientes por Faixa Etária
+                        <i class="bi bi-people-fill me-2"></i> Pacientes por Faixa Etária
                     </h5>
                     <div class="table-responsive">
                         <table class="table table-sm mb-0">
-                            <thead class="table-light">
+                            <thead>
                                 <tr>
                                     <th>Faixa Etária</th>
                                     <th class="text-end">Feminino</th>
@@ -93,10 +191,10 @@
                             <tbody>
                                 {% for faixa in ['0-3', '4-6', '7-9', '10-12', '13-15', '16-18'] %}
                                 <tr>
-                                    <td>{{ faixa }} anos</td>
+                                    <td><i class="bi bi-person-hearts me-2 text-danger"></i>{{ faixa }} anos</td>
                                     <td class="text-end">{{ pacientes_por_faixa.get(faixa, {}).get('feminino', 0) }}</td>
                                     <td class="text-end">{{ pacientes_por_faixa.get(faixa, {}).get('masculino', 0) }}</td>
-                                    <td class="text-end fw-semibold">
+                                    <td class="text-end fw-bold" style="color: var(--viva-verde);">
                                         {{ pacientes_por_faixa.get(faixa, {}).get('feminino', 0) + pacientes_por_faixa.get(faixa, {}).get('masculino', 0) }}
                                     </td>
                                 </tr>
@@ -109,57 +207,57 @@
         </div>
 
         <div class="col-md-6">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
+            <div class="card data-card shadow-sm h-100">
+                <div class="card-body p-4">
                     <h5 class="card-title mb-3">
-                        <i class="bi bi-book-fill text-warning"></i> Top 10 Livros Mais Contados
+                        <i class="bi bi-book-fill text-warning me-2"></i> Top 10 Livros Mais Contados
                     </h5>
-                    <div class="list-group list-group-flush">
-                        {% if livros_ranking %}
-                            {% for livro in livros_ranking %}
-                            <div class="list-group-item px-0 border-0 d-flex justify-content-between align-items-start">
-                                <div class="ms-2 me-auto">
-                                    <div class="fw-semibold">{{ livro.titulo }}</div>
-                                    <small class="text-muted">{{ livro.autor }}</small>
-                                </div>
-                                <span class="badge bg-warning rounded-pill">{{ livro.vezes }}x</span>
+                    {% if livros_ranking %}
+                        {% for livro in livros_ranking %}
+                        <div class="d-flex justify-content-between align-items-start py-2 border-bottom">
+                            <div>
+                                <div class="fw-semibold" style="color: var(--viva-verde);">{{ livro.titulo }}</div>
+                                <small class="text-muted">{{ livro.autor }}</small>
                             </div>
-                            {% endfor %}
-                        {% else %}
-                            <p class="text-muted mb-0">Nenhum livro registrado.</p>
-                        {% endif %}
-                    </div>
+                            <span class="badge bg-warning text-dark rounded-pill">{{ livro.vezes }}x</span>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center text-muted py-4">
+                            <i class="bi bi-book" style="font-size: 2rem;"></i>
+                            <p class="mt-2 mb-0">Nenhum livro registrado</p>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="card border-0 shadow-sm mb-4">
-        <div class="card-body">
+    <div class="card data-card shadow-sm mb-4">
+        <div class="card-body p-4">
             <h5 class="card-title mb-3">
-                <i class="bi bi-geo-alt-fill text-danger"></i> Locais de Atendimento
+                <i class="bi bi-geo-alt-fill text-danger me-2"></i> Locais de Atendimento
             </h5>
-            <div class="row">
+            <div class="d-flex flex-wrap gap-2">
                 {% for local, count in locais_contagem.items() %}
-                <div class="col-md-3 mb-2">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span>{{ local }}</span>
-                        <span class="badge bg-secondary">{{ count }}</span>
-                    </div>
-                </div>
+                    <span class="local-badge">
+                        {{ local }} <strong>({{ count }})</strong>
+                    </span>
+                {% else %}
+                    <span class="text-muted">Nenhum local registrado</span>
                 {% endfor %}
             </div>
         </div>
     </div>
 
-    <div class="card border-0 shadow-sm">
-        <div class="card-body">
+    <div class="card data-card shadow-sm">
+        <div class="card-body p-4">
             <h5 class="card-title mb-3">
-                <i class="bi bi-list-ul text-primary"></i> Atuações Detalhadas
+                <i class="bi bi-list-ul me-2"></i> Atuações Detalhadas
             </h5>
             <div class="table-responsive">
                 <table class="table table-hover mb-0">
-                    <thead class="table-light">
+                    <thead>
                         <tr>
                             <th>Data</th>
                             <th>Voluntário</th>
@@ -173,10 +271,19 @@
                         {% if diarios %}
                             {% for diario in diarios %}
                             <tr>
-                                <td>{{ diario.data.strftime('%d/%m/%Y') }}</td>
-                                <td>{{ diario.voluntario.nome }}</td>
-                                <td>{{ diario.periodo }}</td>
-                                <td>{{ "%.1f"|format(diario.duracao) }}h</td>
+                                <td>
+                                    <i class="bi bi-calendar3 text-success me-1"></i>
+                                    {{ diario.data.strftime('%d/%m/%Y') }}
+                                </td>
+                                <td class="fw-medium">{{ diario.voluntario.nome }}</td>
+                                <td>
+                                    <span class="badge" style="background: var(--viva-amarelo-claro); color: var(--viva-laranja);">
+                                        {{ diario.periodo }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success">{{ "%.1f"|format(diario.duracao) }}h</span>
+                                </td>
                                 <td>
                                     {% set total = namespace(value=0) %}
                                     {% if diario.pacientes_atendidos %}
@@ -188,7 +295,7 @@
                                 </td>
                                 <td>
                                     {% if diario.livros_contados %}
-                                        {{ diario.livros_contados|length }}
+                                        <span class="badge bg-warning text-dark">{{ diario.livros_contados|length }}</span>
                                     {% else %}
                                         0
                                     {% endif %}
@@ -198,7 +305,8 @@
                         {% else %}
                             <tr>
                                 <td colspan="6" class="text-center text-muted py-4">
-                                    Nenhuma atuação encontrada para os filtros selecionados.
+                                    <i class="bi bi-search" style="font-size: 2rem;"></i>
+                                    <p class="mt-2 mb-0">Nenhuma atuação encontrada para os filtros selecionados.</p>
                                 </td>
                             </tr>
                         {% endif %}

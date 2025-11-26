@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Novo Livro - Diário do Contador{% endblock %}
+
+{% block extra_css %}
+<style>
+    .admin-form-card {
+        border-radius: 25px !important;
+        border: 3px solid var(--viva-amarelo-claro) !important;
+    }
+    
+    .admin-header {
+        background: linear-gradient(135deg, var(--viva-verde) 0%, var(--viva-verde-claro) 100%);
+        color: white;
+        border-radius: 20px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-label {
+        color: var(--viva-verde);
+        font-weight: 600;
+    }
+    
+    .form-control {
+        border-radius: 15px;
+        border: 2px solid #e0e0e0;
+    }
+    
+    .form-control:focus {
+        border-color: var(--viva-verde);
+        box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.1);
+    }
+    
+    .btn-save {
+        background: linear-gradient(135deg, var(--viva-verde) 0%, var(--viva-verde-claro) 100%);
+        border: none;
+        border-radius: 15px;
+        padding: 0.8rem 2rem;
+        font-weight: 600;
+    }
+    
+    .btn-back {
+        background: white;
+        border: 2px solid var(--viva-verde);
+        color: var(--viva-verde);
+        border-radius: 15px;
+    }
+    
+    .book-icon {
+        font-size: 4rem;
+        color: var(--viva-amarelo);
+        opacity: 0.3;
+        position: absolute;
+        right: 20px;
+        top: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="admin-header d-flex align-items-center">
+                <a href="{{ url_for('admin_livros') }}" class="btn btn-light btn-sm me-3">
+                    <i class="bi bi-arrow-left"></i>
+                </a>
+                <h1 class="h4 mb-0 fw-bold">
+                    <i class="bi bi-book-fill"></i> Adicionar Novo Livro
+                </h1>
+            </div>
+
+            <div class="card admin-form-card shadow-sm position-relative">
+                <i class="bi bi-journal-bookmark-fill book-icon"></i>
+                <div class="card-body p-4">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="titulo" class="form-label">
+                                <i class="bi bi-book text-danger me-1"></i> Título do Livro *
+                            </label>
+                            <input type="text" class="form-control form-control-lg" id="titulo" name="titulo" 
+                                   placeholder="Ex: O Pequeno Príncipe" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="autor" class="form-label">
+                                <i class="bi bi-person-fill text-warning me-1"></i> Autor
+                            </label>
+                            <input type="text" class="form-control form-control-lg" id="autor" name="autor" 
+                                   placeholder="Ex: Antoine de Saint-Exupéry">
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="editora" class="form-label">
+                                <i class="bi bi-building text-info me-1"></i> Editora
+                            </label>
+                            <input type="text" class="form-control form-control-lg" id="editora" name="editora" 
+                                   placeholder="Ex: Editora Agir">
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-save btn-lg text-white">
+                                <i class="bi bi-check-circle-fill"></i> Adicionar Livro
+                            </button>
+                            <a href="{{ url_for('admin_livros') }}" class="btn btn-back btn-lg">
+                                Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
