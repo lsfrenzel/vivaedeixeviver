@@ -321,7 +321,7 @@ new Chart(ctx, {
         labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
         datasets: [{
             label: 'Horas',
-            data: {{ horas_por_mes }},
+            data: {{ horas_por_mes | tojson }},
             backgroundColor: gradientVerde,
             borderColor: 'rgba(46, 139, 87, 1)',
             borderWidth: 2,
