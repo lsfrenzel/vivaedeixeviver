@@ -161,3 +161,46 @@ Administrator Account:
 - All volunteer data persisted (authentication, activities, books, hospitals)
 - JSON fields for flexible patient demographics and location tracking
 - Admin users can manage all system data and generate reports
+
+## Railway Deployment Configuration
+
+### Prerequisites
+- Railway account (https://railway.app/)
+- GitHub repository with this code
+
+### Deployment Steps
+
+1. **Create Railway Project**
+   - Go to Railway Dashboard
+   - Click "New Project" → "Deploy from GitHub repo"
+   - Select your repository
+
+2. **Add PostgreSQL Database**
+   - In your Railway project, click "+ New"
+   - Select "Database" → "PostgreSQL"
+   - Railway will automatically create `DATABASE_URL` variable
+
+3. **Set Environment Variables**
+   In Railway Variables tab, add:
+   - `SESSION_SECRET`: Generate a secure random string (e.g., `openssl rand -base64 32`)
+
+4. **Deploy**
+   - Railway auto-deploys from GitHub on push
+   - Migrations run automatically via Procfile: `flask db upgrade && gunicorn ...`
+
+### Configuration Files
+- `Procfile`: Railway deployment command with auto-migration
+- `railway.json`: Railway-specific deployment settings
+- `nixpacks.toml`: Build configuration for Railway's Nixpacks builder
+- `requirements.txt`: Python dependencies
+
+### Database Migrations
+- Flask-Migrate (Alembic) for version-controlled migrations
+- Migrations run automatically on each deploy
+- To create new migration: `flask db migrate -m "Description"`
+- To apply migrations: `flask db upgrade`
+
+### Important Notes
+- The app automatically converts `postgres://` to `postgresql://` for SQLAlchemy compatibility
+- SSL mode is handled by Railway's internal networking
+- PORT environment variable is automatically provided by Railway
