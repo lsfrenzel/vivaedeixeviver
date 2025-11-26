@@ -55,17 +55,33 @@
         border: none;
     }
     
-    .btn-export {
-        background: linear-gradient(135deg, var(--viva-verde) 0%, var(--viva-verde-claro) 100%);
+    .btn-export-pdf {
+        background: linear-gradient(135deg, #DC143C 0%, #FF6B6B 100%);
         border: none;
         border-radius: 12px;
         color: white;
         font-weight: 600;
+        padding: 0.5rem 1rem;
     }
     
-    .btn-export:hover {
+    .btn-export-pdf:hover {
         transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(46, 139, 87, 0.3);
+        box-shadow: 0 5px 15px rgba(220, 20, 60, 0.3);
+        color: white;
+    }
+    
+    .btn-export-xlsx {
+        background: linear-gradient(135deg, #217346 0%, #2E8B57 100%);
+        border: none;
+        border-radius: 12px;
+        color: white;
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+    }
+    
+    .btn-export-xlsx:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(33, 115, 70, 0.3);
         color: white;
     }
     
@@ -107,10 +123,16 @@
             </h1>
             <small class="opacity-75">{{ titulo_periodo }}</small>
         </div>
-        <a href="{{ url_for('admin_exportar_relatorio', periodo=periodo, voluntario_id=voluntario_selecionado) }}" 
-           class="btn btn-export">
-            <i class="bi bi-download me-2"></i> Exportar CSV
-        </a>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="{{ url_for('admin_exportar_pdf', periodo=periodo, voluntario_id=voluntario_selecionado) }}" 
+               class="btn btn-export-pdf">
+                <i class="bi bi-file-earmark-pdf-fill me-2"></i> Exportar PDF
+            </a>
+            <a href="{{ url_for('admin_exportar_xlsx', periodo=periodo, voluntario_id=voluntario_selecionado) }}" 
+               class="btn btn-export-xlsx">
+                <i class="bi bi-file-earmark-excel-fill me-2"></i> Exportar Planilha
+            </a>
+        </div>
     </div>
 
     <div class="card filter-card shadow-sm mb-4">

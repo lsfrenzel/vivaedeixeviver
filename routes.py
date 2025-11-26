@@ -656,6 +656,366 @@ def admin_exportar_relatorio():
     )
 
 
+@app.route('/admin/relatorios/exportar-xlsx')
+@login_required
+@admin_required
+def admin_exportar_xlsx():
+    from io import BytesIO
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
+    from openpyxl.utils import get_column_letter
+    from flask import Response
+    
+    periodo = request.args.get('periodo', 'mes')
+    voluntario_id = request.args.get('voluntario_id', '')
+    
+    hoje = datetime.now()
+    
+    if periodo == 'mes':
+        inicio = hoje.replace(day=1)
+        titulo_periodo = f'{inicio.strftime("%B de %Y")}'
+    elif periodo == 'ano':
+        inicio = hoje.replace(month=1, day=1)
+        titulo_periodo = f'Ano {hoje.year}'
+    else:
+        inicio = datetime(2000, 1, 1)
+        titulo_periodo = 'Todo o período'
+    
+    query = Diario.query.filter(Diario.data >= inicio)
+    
+    if voluntario_id:
+        query = query.filter(Diario.voluntario_id == int(voluntario_id))
+    
+    diarios = query.order_by(Diario.data.desc()).all()
+    
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Relatório de Atuações"
+    
+    header_font = Font(bold=True, color="FFFFFF", size=12)
+    header_fill = PatternFill(start_color="2E8B57", end_color="2E8B57", fill_type="solid")
+    header_alignment = Alignment(horizontal="center", vertical="center")
+    thin_border = Border(
+        left=Side(style='thin'),
+        right=Side(style='thin'),
+        top=Side(style='thin'),
+        bottom=Side(style='thin')
+    )
+    
+    ws.merge_cells('A1:G1')
+    ws['A1'] = f"Relatório de Atuações - {titulo_periodo}"
+    ws['A1'].font = Font(bold=True, size=16, color="2E8B57")
+    ws['A1'].alignment = Alignment(horizontal="center")
+    
+    ws.merge_cells('A2:G2')
+    ws['A2'] = f"Gerado em: {hoje.strftime('%d/%m/%Y às %H:%M')}"
+    ws['A2'].alignment = Alignment(horizontal="center")
+    
+    total_horas = sum(d.duracao for d in diarios)
+    total_atuacoes = len(diarios)
+    total_pacientes = 0
+    for diario in diarios:
+        if diario.pacientes_atendidos:
+            for faixa, dados in diario.pacientes_atendidos.items():
+                total_pacientes += dados.get('feminino', 0) + dados.get('masculino', 0)
+    
+    ws['A4'] = "Total de Horas:"
+    ws['B4'] = f"{total_horas:.1f}h"
+    ws['C4'] = "Total de Atuações:"
+    ws['D4'] = total_atuacoes
+    ws['E4'] = "Total de Pacientes:"
+    ws['F4'] = total_pacientes
+    for col in ['A', 'C', 'E']:
+        ws[f'{col}4'].font = Font(bold=True)
+    
+    headers = ['Data', 'Voluntário', 'Período', 'Duração (h)', 'Pacientes', 'Livros', 'Locais']
+    for col, header in enumerate(headers, 1):
+        cell = ws.cell(row=6, column=col, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = header_alignment
+        cell.border = thin_border
+    
+    for row, diario in enumerate(diarios, 7):
+        total_pac = 0
+        if diario.pacientes_atendidos:
+            for faixa, dados in diario.pacientes_atendidos.items():
+                total_pac += dados.get('feminino', 0) + dados.get('masculino', 0)
+        
+        livros = len(diario.livros_contados) if diario.livros_contados else 0
+        locais = ', '.join(diario.locais_atendimento) if diario.locais_atendimento else ''
+        
+        data_row = [
+            diario.data.strftime('%d/%m/%Y'),
+            diario.voluntario.nome,
+            diario.periodo,
+            diario.duracao,
+            total_pac,
+            livros,
+            locais
+        ]
+        
+        for col, value in enumerate(data_row, 1):
+            cell = ws.cell(row=row, column=col, value=value)
+            cell.border = thin_border
+            if col == 4:
+                cell.number_format = '0.0'
+    
+    column_widths = [12, 25, 12, 12, 12, 10, 35]
+    for i, width in enumerate(column_widths, 1):
+        ws.column_dimensions[get_column_letter(i)].width = width
+    
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+    
+    return Response(
+        output.getvalue(),
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        headers={'Content-Disposition': f'attachment; filename=relatorio_atuacoes_{hoje.strftime("%Y%m%d")}.xlsx'}
+    )
+
+
+@app.route('/admin/relatorios/exportar-pdf')
+@login_required
+@admin_required
+def admin_exportar_pdf():
+    from io import BytesIO
+    from flask import Response
+    from reportlab.lib import colors
+    from reportlab.lib.pagesizes import A4, landscape
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.units import cm, inch
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
+    from reportlab.graphics.shapes import Drawing
+    from reportlab.graphics.charts.barcharts import VerticalBarChart
+    from reportlab.graphics.charts.piecharts import Pie
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+    
+    periodo = request.args.get('periodo', 'mes')
+    voluntario_id = request.args.get('voluntario_id', '')
+    
+    hoje = datetime.now()
+    
+    if periodo == 'mes':
+        inicio = hoje.replace(day=1)
+        titulo_periodo = f'{inicio.strftime("%B de %Y")}'
+    elif periodo == 'ano':
+        inicio = hoje.replace(month=1, day=1)
+        titulo_periodo = f'Ano {hoje.year}'
+    else:
+        inicio = datetime(2000, 1, 1)
+        titulo_periodo = 'Todo o período'
+    
+    query = Diario.query.filter(Diario.data >= inicio)
+    
+    if voluntario_id:
+        query = query.filter(Diario.voluntario_id == int(voluntario_id))
+    
+    diarios = query.order_by(Diario.data.desc()).all()
+    
+    total_horas = sum(d.duracao for d in diarios)
+    total_atuacoes = len(diarios)
+    
+    total_pacientes = 0
+    pacientes_por_faixa = {}
+    for diario in diarios:
+        if diario.pacientes_atendidos:
+            for faixa, dados in diario.pacientes_atendidos.items():
+                fem = dados.get('feminino', 0)
+                masc = dados.get('masculino', 0)
+                total_pacientes += fem + masc
+                if faixa not in pacientes_por_faixa:
+                    pacientes_por_faixa[faixa] = {'feminino': 0, 'masculino': 0}
+                pacientes_por_faixa[faixa]['feminino'] += fem
+                pacientes_por_faixa[faixa]['masculino'] += masc
+    
+    locais_contagem = {}
+    for diario in diarios:
+        if diario.locais_atendimento:
+            for local in diario.locais_atendimento:
+                locais_contagem[local] = locais_contagem.get(local, 0) + 1
+    
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4, topMargin=1.5*cm, bottomMargin=1.5*cm)
+    elements = []
+    styles = getSampleStyleSheet()
+    
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=20,
+        textColor=colors.HexColor('#2E8B57'),
+        spaceAfter=12,
+        alignment=1
+    )
+    
+    subtitle_style = ParagraphStyle(
+        'CustomSubtitle',
+        parent=styles['Normal'],
+        fontSize=12,
+        textColor=colors.gray,
+        spaceAfter=20,
+        alignment=1
+    )
+    
+    section_style = ParagraphStyle(
+        'SectionTitle',
+        parent=styles['Heading2'],
+        fontSize=14,
+        textColor=colors.HexColor('#2E8B57'),
+        spaceBefore=20,
+        spaceAfter=10
+    )
+    
+    elements.append(Paragraph("Diário do Contador", title_style))
+    elements.append(Paragraph(f"Relatório de Atuações - {titulo_periodo}", subtitle_style))
+    elements.append(Paragraph(f"Gerado em: {hoje.strftime('%d/%m/%Y às %H:%M')}", subtitle_style))
+    
+    elements.append(Paragraph("Resumo Geral", section_style))
+    
+    summary_data = [
+        ['Indicador', 'Valor'],
+        ['Total de Horas', f'{total_horas:.1f}h'],
+        ['Total de Atuações', str(total_atuacoes)],
+        ['Total de Pacientes Atendidos', str(total_pacientes)]
+    ]
+    
+    summary_table = Table(summary_data, colWidths=[10*cm, 5*cm])
+    summary_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2E8B57')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 12),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#F0FFF0')),
+        ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#2E8B57')),
+        ('FONTSIZE', (0, 1), (-1, -1), 11),
+        ('TOPPADDING', (0, 1), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 8),
+    ]))
+    elements.append(summary_table)
+    elements.append(Spacer(1, 20))
+    
+    if pacientes_por_faixa:
+        elements.append(Paragraph("Pacientes por Faixa Etária", section_style))
+        
+        faixas = ['0-3', '4-6', '7-9', '10-12', '13-15', '16-18']
+        faixa_data = [['Faixa Etária', 'Feminino', 'Masculino', 'Total']]
+        
+        for faixa in faixas:
+            if faixa in pacientes_por_faixa:
+                fem = pacientes_por_faixa[faixa]['feminino']
+                masc = pacientes_por_faixa[faixa]['masculino']
+                faixa_data.append([f'{faixa} anos', str(fem), str(masc), str(fem + masc)])
+        
+        if len(faixa_data) > 1:
+            faixa_table = Table(faixa_data, colWidths=[5*cm, 3*cm, 3*cm, 3*cm])
+            faixa_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#FF6B6B')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#FF6B6B')),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#FFF0F0')),
+                ('TOPPADDING', (0, 0), (-1, -1), 6),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+            ]))
+            elements.append(faixa_table)
+            elements.append(Spacer(1, 20))
+            
+            fig, ax = plt.subplots(figsize=(6, 3))
+            faixas_labels = [f'{f} anos' for f in faixas if f in pacientes_por_faixa]
+            fem_values = [pacientes_por_faixa.get(f, {}).get('feminino', 0) for f in faixas if f in pacientes_por_faixa]
+            masc_values = [pacientes_por_faixa.get(f, {}).get('masculino', 0) for f in faixas if f in pacientes_por_faixa]
+            
+            x = range(len(faixas_labels))
+            width = 0.35
+            ax.bar([i - width/2 for i in x], fem_values, width, label='Feminino', color='#FF6B6B')
+            ax.bar([i + width/2 for i in x], masc_values, width, label='Masculino', color='#4ECDC4')
+            ax.set_ylabel('Pacientes')
+            ax.set_title('Pacientes por Faixa Etária e Gênero')
+            ax.set_xticks(x)
+            ax.set_xticklabels(faixas_labels, rotation=45, ha='right')
+            ax.legend()
+            plt.tight_layout()
+            
+            chart_buffer = BytesIO()
+            plt.savefig(chart_buffer, format='png', dpi=150, bbox_inches='tight')
+            plt.close()
+            chart_buffer.seek(0)
+            
+            chart_img = Image(chart_buffer, width=14*cm, height=7*cm)
+            elements.append(chart_img)
+            elements.append(Spacer(1, 20))
+    
+    if locais_contagem:
+        elements.append(Paragraph("Locais de Atendimento", section_style))
+        
+        fig, ax = plt.subplots(figsize=(5, 4))
+        locais = list(locais_contagem.keys())
+        valores = list(locais_contagem.values())
+        colors_pie = ['#2E8B57', '#FF6B6B', '#FFD93D', '#4ECDC4', '#9B59B6', '#3498DB', '#E67E22', '#1ABC9C']
+        
+        ax.pie(valores, labels=locais, autopct='%1.1f%%', colors=colors_pie[:len(locais)], startangle=90)
+        ax.set_title('Distribuição por Local de Atendimento')
+        
+        pie_buffer = BytesIO()
+        plt.savefig(pie_buffer, format='png', dpi=150, bbox_inches='tight')
+        plt.close()
+        pie_buffer.seek(0)
+        
+        pie_img = Image(pie_buffer, width=12*cm, height=10*cm)
+        elements.append(pie_img)
+        elements.append(Spacer(1, 20))
+    
+    if diarios:
+        elements.append(Paragraph("Atuações Detalhadas", section_style))
+        
+        detail_data = [['Data', 'Voluntário', 'Período', 'Horas', 'Pacientes']]
+        
+        for diario in diarios[:50]:
+            total_pac = 0
+            if diario.pacientes_atendidos:
+                for faixa, dados in diario.pacientes_atendidos.items():
+                    total_pac += dados.get('feminino', 0) + dados.get('masculino', 0)
+            
+            detail_data.append([
+                diario.data.strftime('%d/%m/%Y'),
+                diario.voluntario.nome[:20],
+                diario.periodo,
+                f'{diario.duracao:.1f}h',
+                str(total_pac)
+            ])
+        
+        detail_table = Table(detail_data, colWidths=[2.5*cm, 5*cm, 2.5*cm, 2*cm, 2.5*cm])
+        detail_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2E8B57')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('FONTSIZE', (0, 1), (-1, -1), 9),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.gray),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F0FFF0')]),
+            ('TOPPADDING', (0, 0), (-1, -1), 4),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ]))
+        elements.append(detail_table)
+    
+    doc.build(elements)
+    buffer.seek(0)
+    
+    return Response(
+        buffer.getvalue(),
+        mimetype='application/pdf',
+        headers={'Content-Disposition': f'attachment; filename=relatorio_atuacoes_{hoje.strftime("%Y%m%d")}.pdf'}
+    )
+
+
 @app.route('/admin/relatorios')
 @login_required
 @admin_required
