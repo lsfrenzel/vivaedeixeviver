@@ -4,22 +4,20 @@ import routes
 import os
 
 
-def init_admin():
-    """Create admin user if none exists."""
+def init_users():
+    """Create admin and volunteer users if they don't exist."""
     from models import Voluntario, Hospital
     
-    admin_exists = Voluntario.query.filter_by(is_admin=True).first()
+    hospital = Hospital.query.first()
+    if not hospital:
+        hospital = Hospital(nome="Hospital Padrão", estado="SP")
+        db.session.add(hospital)
+        db.session.commit()
+        print(f"Hospital criado: {hospital.nome}")
     
+    admin_exists = Voluntario.query.filter_by(is_admin=True).first()
     if not admin_exists:
-        print("Nenhum administrador encontrado. Criando admin padrão...")
-        
-        hospital = Hospital.query.first()
-        if not hospital:
-            hospital = Hospital(nome="Hospital Padrão", estado="SP")
-            db.session.add(hospital)
-            db.session.commit()
-            print(f"Hospital criado: {hospital.nome}")
-        
+        print("Criando admin padrão...")
         admin_email = os.environ.get("ADMIN_EMAIL", "admin@diariodocontador.com")
         admin_password = os.environ.get("ADMIN_PASSWORD", "admin123")
         
@@ -33,16 +31,31 @@ def init_admin():
         admin.set_senha(admin_password)
         db.session.add(admin)
         db.session.commit()
-        
-        print(f"Admin criado com sucesso!")
-        print(f"E-mail: {admin_email}")
+        print(f"Admin criado: {admin_email}")
     else:
         print(f"Admin já existe: {admin_exists.email}")
+    
+    voluntario_exists = Voluntario.query.filter_by(email="voluntario@diariodocontador.com").first()
+    if not voluntario_exists:
+        print("Criando voluntário padrão...")
+        voluntario = Voluntario(
+            nome="Voluntário Teste",
+            email="voluntario@diariodocontador.com",
+            estado_padrao="SP",
+            hospital_padrao_id=hospital.id,
+            is_admin=False
+        )
+        voluntario.set_senha("senha123")
+        db.session.add(voluntario)
+        db.session.commit()
+        print("Voluntário criado: voluntario@diariodocontador.com")
+    else:
+        print(f"Voluntário já existe: {voluntario_exists.email}")
 
 
 with app.app_context():
     db.create_all()
-    init_admin()
+    init_users()
 
 
 if __name__ == "__main__":
