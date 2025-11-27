@@ -71,19 +71,23 @@
                             ] %}
                             
                             {% for faixa in faixas %}
-                            <div class="col-md-6 col-lg-4">
-                                <div class="border rounded p-3">
-                                    <label class="form-label fw-medium small">{{ faixa.label }}</label>
-                                    <div class="row g-2">
+                            <div class="col-12 col-md-6 col-lg-4">
+                                <div class="border rounded p-3 pacientes-card">
+                                    <label class="form-label fw-semibold mb-3">{{ faixa.label }}</label>
+                                    <div class="row g-2 pacientes-input-group">
                                         <div class="col-6">
-                                            <label class="form-label small text-muted">Feminino</label>
-                                            <input type="number" class="form-control" name="pacientes_{{ faixa.id }}_f" 
-                                                   min="0" value="0">
+                                            <label class="form-label small text-muted mb-1">
+                                                <i class="bi bi-gender-female me-1"></i>Feminino
+                                            </label>
+                                            <input type="number" class="form-control form-control-lg text-center" 
+                                                   name="pacientes_{{ faixa.id }}_f" min="0" value="0" inputmode="numeric">
                                         </div>
                                         <div class="col-6">
-                                            <label class="form-label small text-muted">Masculino</label>
-                                            <input type="number" class="form-control" name="pacientes_{{ faixa.id }}_m" 
-                                                   min="0" value="0">
+                                            <label class="form-label small text-muted mb-1">
+                                                <i class="bi bi-gender-male me-1"></i>Masculino
+                                            </label>
+                                            <input type="number" class="form-control form-control-lg text-center" 
+                                                   name="pacientes_{{ faixa.id }}_m" min="0" value="0" inputmode="numeric">
                                         </div>
                                     </div>
                                 </div>
@@ -101,11 +105,11 @@
                         
                         <div class="row g-2">
                             {% for local in locais_disponiveis %}
-                            <div class="col-md-6 col-lg-4">
-                                <div class="form-check p-3 border rounded">
+                            <div class="col-12 col-md-6 col-lg-4">
+                                <div class="form-check touch-friendly p-3 border rounded">
                                     <input class="form-check-input" type="checkbox" name="locais_atendimento" 
                                            value="{{ local }}" id="local_{{ loop.index }}">
-                                    <label class="form-check-label fw-medium" for="local_{{ loop.index }}">
+                                    <label class="form-check-label fw-medium w-100" for="local_{{ loop.index }}">
                                         {{ local }}
                                     </label>
                                 </div>
@@ -131,7 +135,7 @@
                         <div id="livrosSelecionados" class="mb-3"></div>
                         
                         <div class="border-top pt-3">
-                            <button type="button" class="btn btn-outline-primary" id="btnNovoLivro">
+                            <button type="button" class="btn btn-outline-primary btn-lg w-100" id="btnNovoLivro">
                                 <i class="bi bi-plus-circle me-2"></i>Adicionar Novo Livro
                             </button>
                         </div>
@@ -170,11 +174,13 @@
                     </div>
                 </div>
 
-                <div class="d-grid gap-2 mb-4 sticky-bottom-btn">
-                    <button type="submit" class="btn btn-primary btn-lg fw-semibold">
+                <div class="d-grid gap-3 mb-4 sticky-bottom-btn">
+                    <button type="submit" class="btn btn-primary btn-lg fw-bold py-3">
                         <i class="bi bi-check-circle me-2"></i>Registrar Atuação
                     </button>
-                    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">Cancelar</a>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary btn-lg py-2">
+                        <i class="bi bi-x-circle me-2"></i>Cancelar
+                    </a>
                 </div>
             </form>
         </div>

@@ -430,13 +430,25 @@ body {
 
 @media (max-width: 768px) {
     .sticky-bottom-btn {
-        position: sticky;
+        position: fixed;
         bottom: 0;
+        left: 0;
+        right: 0;
         background: white;
-        padding: 1rem;
-        margin: 0 -1rem;
-        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        padding: 1rem 1.5rem;
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
         border-radius: 20px 20px 0 0;
+        z-index: 1000;
+    }
+    
+    .sticky-bottom-btn .btn {
+        min-height: 56px;
+        font-size: 1.1rem;
+    }
+    
+    .sticky-bottom-btn .btn-primary {
+        min-height: 60px;
+        font-size: 1.2rem;
     }
     
     .navbar-nav {
@@ -449,6 +461,69 @@ body {
     
     .stat-card .card-body {
         padding: 1.25rem;
+    }
+    
+    .form-control,
+    .form-select {
+        min-height: 52px !important;
+        font-size: 1rem !important;
+    }
+    
+    .form-control-lg,
+    .form-select-lg {
+        min-height: 56px !important;
+        font-size: 1.1rem !important;
+    }
+    
+    .btn {
+        min-height: 52px;
+        font-size: 1rem;
+        padding: 0.875rem 1.25rem;
+    }
+    
+    .btn-lg {
+        min-height: 58px;
+        font-size: 1.15rem;
+        padding: 1rem 1.5rem;
+    }
+    
+    .form-check.touch-friendly {
+        min-height: 60px;
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        margin: 0.25rem 0;
+    }
+    
+    .form-check.touch-friendly .form-check-input {
+        width: 26px;
+        height: 26px;
+        margin-right: 12px;
+    }
+    
+    .form-check.touch-friendly .form-check-label {
+        font-size: 1.05rem;
+        padding: 0.5rem 0;
+    }
+    
+    .pacientes-input-group input {
+        min-height: 52px !important;
+        font-size: 1.1rem !important;
+        text-align: center;
+    }
+    
+    .card-body {
+        padding: 1.25rem !important;
+    }
+    
+    body {
+        padding-bottom: 140px;
+    }
+    
+    #btnNovoLivro {
+        width: 100%;
+        min-height: 56px;
+        font-size: 1.1rem;
     }
 }
 
@@ -513,4 +588,80 @@ input[type="number"]::-webkit-outer-spin-button {
     position: fixed;
     pointer-events: none;
     z-index: 1000;
+}
+
+.pacientes-card {
+    background: #fafafa;
+    transition: all 0.2s ease;
+}
+
+.pacientes-card:focus-within {
+    border-color: var(--viva-verde) !important;
+    box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.15);
+}
+
+.pacientes-input-group input {
+    font-weight: 600;
+    border-radius: 12px;
+}
+
+.pacientes-input-group input:focus {
+    border-color: var(--viva-verde);
+    box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.2);
+}
+
+.touch-friendly {
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.touch-friendly:active {
+    transform: scale(0.98);
+    background-color: var(--viva-amarelo-claro) !important;
+}
+
+.touch-friendly .form-check-input {
+    cursor: pointer;
+}
+
+.touch-friendly .form-check-label {
+    cursor: pointer;
+    flex: 1;
+}
+
+@media (max-width: 576px) {
+    .container {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+    
+    .card-body.p-4 {
+        padding: 1.25rem !important;
+    }
+    
+    h1.h3 {
+        font-size: 1.5rem;
+    }
+    
+    .pacientes-card {
+        padding: 1rem !important;
+    }
+    
+    .pacientes-card .form-label.fw-semibold {
+        font-size: 1rem;
+        margin-bottom: 0.75rem !important;
+    }
+    
+    .sticky-bottom-btn {
+        padding: 1rem;
+    }
+    
+    .sticky-bottom-btn .btn-primary {
+        min-height: 64px;
+        font-size: 1.25rem;
+    }
+    
+    .sticky-bottom-btn .btn-outline-secondary {
+        min-height: 52px;
+    }
 }
