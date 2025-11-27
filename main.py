@@ -6,7 +6,8 @@ import os
 
 def init_users():
     """Create admin and volunteer users if they don't exist."""
-    from models import Voluntario, Hospital
+    from models import Voluntario, Hospital, Livro, Diario
+    from datetime import datetime, timedelta
     
     hospital = Hospital.query.first()
     if not hospital:
@@ -35,8 +36,8 @@ def init_users():
     else:
         print(f"Admin já existe: {admin_exists.email}")
     
-    voluntario_exists = Voluntario.query.filter_by(email="voluntario@diariodocontador.com").first()
-    if not voluntario_exists:
+    voluntario = Voluntario.query.filter_by(email="voluntario@diariodocontador.com").first()
+    if not voluntario:
         print("Criando voluntário padrão...")
         voluntario = Voluntario(
             nome="Voluntário Teste",
@@ -50,7 +51,43 @@ def init_users():
         db.session.commit()
         print("Voluntário criado: voluntario@diariodocontador.com")
     else:
-        print(f"Voluntário já existe: {voluntario_exists.email}")
+        print(f"Voluntário já existe: {voluntario.email}")
+    
+    if Livro.query.count() == 0:
+        print("Criando livros de exemplo...")
+        livros = [
+            Livro(titulo="O Pequeno Príncipe", autor="Antoine de Saint-Exupéry", editora="Agir"),
+            Livro(titulo="O Menino Maluquinho", autor="Ziraldo", editora="Melhoramentos"),
+            Livro(titulo="Chapeuzinho Vermelho", autor="Irmãos Grimm", editora="Ática"),
+            Livro(titulo="Os Três Porquinhos", autor="Tradicional", editora="Todolivro"),
+            Livro(titulo="Alice no País das Maravilhas", autor="Lewis Carroll", editora="Zahar"),
+        ]
+        db.session.add_all(livros)
+        db.session.commit()
+        print(f"{len(livros)} livros criados")
+    
+    if Diario.query.count() == 0 and voluntario:
+        print("Criando atuação de exemplo...")
+        livros = Livro.query.limit(2).all()
+        livros_data = [{"id": l.id, "titulo": l.titulo, "autor": l.autor, "editora": l.editora} for l in livros]
+        
+        atuacao = Diario(
+            voluntario_id=voluntario.id,
+            data=datetime.now().date(),
+            periodo="Manhã",
+            duracao=2.0,
+            pacientes_atendidos={
+                "0-3": {"feminino": 2, "masculino": 1},
+                "4-6": {"feminino": 3, "masculino": 2},
+                "7-9": {"feminino": 1, "masculino": 2}
+            },
+            locais_atendimento=["Pediatria", "Enfermaria"],
+            livros_contados=livros_data,
+            relato_qualitativo="Atuação muito gratificante. As crianças adoraram as histórias!"
+        )
+        db.session.add(atuacao)
+        db.session.commit()
+        print("Atuação de exemplo criada")
 
 
 with app.app_context():
