@@ -1,0 +1,264 @@
+[Region: us-east4]
+==============
+Using Nixpacks
+==============
+
+context: nb2j-G_23
+╔══════════════════════════════ Nixpacks v1.38.0 ══════════════════════════════╗
+║ setup      │ python311, postgresql_16.dev, gcc                               ║
+║──────────────────────────────────────────────────────────────────────────────║
+║ install    │ python -m venv --copies /opt/venv && . /opt/venv/bin/activate   ║
+║            │ && pip install -r requirements.txt                              ║
+║──────────────────────────────────────────────────────────────────────────────║
+║ build      │ flask db upgrade || true                                        ║
+║            │ python init_db.py                                               ║
+║──────────────────────────────────────────────────────────────────────────────║
+║ start      │ gunicorn --bind 0.0.0.0:$PORT --reuse-port main:app             ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+internal
+load build definition from Dockerfile
+0ms
+
+internal
+load metadata for ghcr.io/railwayapp/nixpacks:ubuntu-1745885067
+36ms
+
+internal
+load .dockerignore
+0ms
+
+internal
+load build context
+0ms
+
+stage-0
+COPY .nixpacks/nixpkgs-bc8f8d1be58e8c8383e683a06e1e1e57893fff87.nix .nixpacks/nixpkgs-bc8f8d1be58e8c8383e683a06e1e1e57893fff87.nix cached
+0ms
+
+stage-0
+RUN nix-env -if .nixpacks/nixpkgs-bc8f8d1be58e8c8383e683a06e1e1e57893fff87.nix && nix-collect-garbage -d cached
+0ms
+
+stage-0
+COPY . /app/.
+240ms
+
+stage-0
+RUN python -m venv --copies /opt/venv && . /opt/venv/bin/activate && pip install -r requirements.txt
+16s
+Successfully installed Flask-3.1.2 Flask-Login-0.6.3 Flask-Migrate-4.1.0 Flask-SQLAlchemy-3.1.1 Jinja2-3.1.6 Mako-1.3.10 MarkupSafe-3.0.3 SQLAlchemy-2.0.44 Werkzeug-3.1.3 alembic-1.17.2 blinker-1.9.0 charset-normalizer-3.4.4 click-8.3.1 contourpy-1.3.3 cycler-0.12.1 dnspython-2.8.0 email-validator-2.3.0 et_xmlfile-2.0.0 fonttools-4.60.1 greenlet-3.2.4 gunicorn-23.0.0 idna-3.11 itsdangerous-2.2.0 kiwisolver-1.4.9 matplotlib-3.10.7 numpy-2.3.5 openpyxl-3.1.5 packaging-25.0 pillow-12.0.0 psycopg2-binary-2.9.11 pyparsing-3.2.5 python-dateutil-2.9.0.post0 python-dotenv-1.2.1 reportlab-4.4.5 six-1.17.0 typing_extensions-4.15.0
+
+stage-0
+COPY . /app/.
+95ms
+
+stage-0
+RUN  flask db upgrade || true
+982ms
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+
+stage-0
+RUN  python init_db.py
+974ms
+Traceback (most recent call last):
+  File "/opt/venv/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 143, in __init__
+    self._dbapi_connection = engine.raw_connection()
+                             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 3301, in raw_connection
+    return self.pool.connect()
+           ^^^^^^^^^^
+^^^^^^^^^
+  File "/opt/venv/lib/python3.11/site-packages/sqlalchemy/pool/base.py", line 447, in connect
+    return _ConnectionFairy._checkout(self)
+           ^
+^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^
+^
+  File "/opt/venv/lib/python3.11/site-packages/sqlalchemy/pool/base.py", line 1264, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^
+  File "/opt/venv/lib/python3.11/site-packages/sqlalchemy/pool/base.py", line 711, in checkout
+    rec = pool._do_get()
+          ^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.11/site-packages/sqlalchemy/pool/impl.py", line 177, in _do_get
+    with util.safe_reraise():
+  File "/opt/venv/lib/python3.11/site-packages/sqlalchemy/util/langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "/opt/venv/lib/python3.11/site-packages/sqlalchemy/pool/impl.py", line 175, in _do_get
+    return self._create_connection()
+         
+  ^^^^^^^^^
+^^^
+^^^
+^^^
+^^^
+^^^
+^
+  File "/opt/venv/lib/python3.11/site-packages/sqlalchemy/pool/base.py", line 388, in _create_connection
+    return _ConnectionRecord(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.11/site-packages/sqlalchemy/pool/base.py", line 673, in __init__
+    self.__connect()
+  File "/opt/venv/lib/python3.11/site-packages/sqlalchemy/pool/base.py", line 899, in __connect
+    with util.safe_reraise():
+  File "/opt/venv/lib/python3.11/site-packages/sqlalchemy/util/langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "/opt/venv/lib/python3.11/site-packages/sqlalchemy/pool/base.py", line 895, in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.11/site-packages/sqlalchemy/engine/create.py", line 661, in connect
+    return dialect.connect(*cargs, **cparams)
+           ^^^^^^^^^
+^^^^^^^^^^^^^^
+^^^^^
+^^^^
+^
+^
+  File "/opt/venv/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 629, in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)  # type: ignore[no-any-return]  # NOQA: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^
+^^^
+  File "/opt/venv/lib/python3.11/site-packages/psycopg2/__init__.py", line 122, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+           ^^^^^^
+^^
+^^^^^^
+^^^^^
+^^^
+^^
+^
+^^^^
+^^
+^^
+^^
+^^^^^
+^^
+^^
+^
+^^^^
+^^^
+^^^^^^^^^
+^^
+psycopg2.OperationalError: could not translate host name "postgres.railway.internal" to address: Name or service not known
+The above exception was the direct cause of the following exception:
+Traceback (most recent call last):
+  File "/app/init_db.py", line 46, in <module>
+    init_database()
+  File "/app/init_db.py", line 9, in init_database
+    db.create_all()
+  File "/opt/venv/lib/python3.11/site-packages/flask_sqlalchemy/extension.py", line 900, in create_all
+    self._call_for_binds(bind_key, "create_all")
+  File "/opt/venv/lib/python3.11/site-packages/flask_sqlalchemy/extension.py", line 881, in _call_for_binds
+    getattr(metadata, op_name)(bind=engine)
+  File "/opt/venv/lib/python3.11/site-packages/sqlalchemy/sql/schema.py", line 5928, in create_all
+    bind._run_ddl_visitor(
+  File "/opt/venv/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 3251, in _run_ddl_visitor
+    with self.begin() as conn:
+  File "/root/.nix-profile/lib/python3.11/contextlib.py", line 137, in __enter__
+    return next(self.gen)
+         
+  ^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 3241, in begin
+    with self.connect() as conn:
+         ^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 3277, in connect
+    return self._connection_cls(self)
+           ^^^^^^
+^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 145, in __init__
+    Connection._handle_dbapi_exception_noconnection(
+  File "/opt/venv/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 2440, in _handle_dbapi_exception_noconnection
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/opt/venv/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 143, in __init__
+    self._dbapi_connection = engine.raw_connection()
+             
+     
+     
+    
+  ^^
+^^
+^^
+^^^^^
+^^^^^^^^^^^
+^
+  File "/opt/venv/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 3301, in raw_connection
+    return self.pool.connect()
+           ^^^^^^^^^^^^^
+^^^^^^
+  File "/opt/venv/lib/python3.11/site-packages/sqlalchemy/pool/base.py", line 447, in connect
+    return _ConnectionFairy._checkout(self)
+           ^^^^^^^^
+^^^^^^^^^^^^^^^
+^^
+^^^^^
+^^
+  File "/opt/venv/lib/python3.11/site-packages/sqlalchemy/pool/base.py", line 1264, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+            ^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^
+  File "/opt/venv/lib/python3.11/site-packages/sqlalchemy/pool/base.py", line 711, in checkout
+    rec = pool._do_get()
+          ^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.11/site-packages/sqlalchemy/pool/impl.py", line 177, in _do_get
+    with util.safe_reraise():
+  File "/opt/venv/lib/python3.11/site-packages/sqlalchemy/util/langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "/opt/venv/lib/python3.11/site-packages/sqlalchemy/pool/impl.py", line 175, in _do_get
+    return self._create_connection()
+           ^^^^^^^^^^
+^^^^^
+^^^^^^^^^^
+  File "/opt/venv/lib/python3.11/site-packages/sqlalchemy/pool/base.py", line 388, in _create_connection
+    return _ConnectionRecord(self)
+           
+^^^^^^^^^^^^^^^^^^
+^^^^^
+  File "/opt/venv/lib/python3.11/site-packages/sqlalchemy/pool/base.py", line 673, in __init__
+    self.__connect()
+  File "/opt/venv/lib/python3.11/site-packages/sqlalchemy/pool/base.py", line 899, in __connect
+    with util.safe_reraise():
+  File "/opt/venv/lib/python3.11/site-packages/sqlalchemy/util/langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "/opt/venv/lib/python3.11/site-packages/sqlalchemy/pool/base.py", line 895, in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.11/site-packages/sqlalchemy/engine/create.py", line 661, in connect
+    return dialect.connect(*cargs, **cparams)
+           ^
+^^^^^
+^^^^^^^^
+^^^^^
+^^^^
+^^^^
+^^^^^^^
+  File "/opt/venv/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 629, in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)  # type: ignore[no-any-return]  # NOQA: E501
+           ^
+^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^
+^^^^^^^
+^^^^^
+  File "/opt/venv/lib/python3.11/site-packages/psycopg2/__init__.py", line 122, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+           ^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^
+^^^
+^^^^^^^^^
+^^^^^
+^^^^^
+sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) could not translate host name "postgres.railway.internal" to address: Name or service not known
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Dockerfile:25
+-------------------
+23 |     COPY . /app/.
+24 |     RUN  flask db upgrade || true
+25 | >>> RUN  python init_db.py
+26 |
+27 |
+-------------------
+ERROR: failed to build: failed to solve: process "/bin/bash -ol pipefail -c python init_db.py" did not complete successfully: exit code: 1
+Error: Docker build failed
