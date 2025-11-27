@@ -1,8 +1,8 @@
-modules = ["web", "python-3.11", "nodejs-20", "postgresql-16"]
+modules = ["web", "python-3.11", "nodejs-20"]
 
 [nix]
 channel = "stable-25_05"
-packages = ["cairo", "ffmpeg-full", "freetype", "ghostscript", "glibcLocales", "gobject-introspection", "gtk3", "openssl", "pkg-config", "postgresql", "qhull", "tcl", "tk"]
+packages = ["cacert", "cairo", "chromedriver", "ffmpeg-full", "freetype", "ghostscript", "glibcLocales", "gobject-introspection", "gtk3", "lcms2", "libcxx", "libimagequant", "libjpeg", "libtiff", "libwebp", "libxcrypt", "openjpeg", "openssl", "pkg-config", "postgresql", "qhull", "tcl", "tk", "zlib"]
 
 [deployment]
 deploymentTarget = "autoscale"
@@ -35,6 +35,10 @@ waitForPort = 5000
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[[ports]]
+localPort = 34019
+externalPort = 3000
 
 [[ports]]
 localPort = 45065
