@@ -4,7 +4,7 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "flask db upgrade && gunicorn --bind 0.0.0.0:$PORT --reuse-port main:app",
+    "startCommand": "gunicorn --bind 0.0.0.0:$PORT --reuse-port main:app",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
   }

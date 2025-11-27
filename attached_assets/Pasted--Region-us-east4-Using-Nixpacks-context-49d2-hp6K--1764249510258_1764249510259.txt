@@ -1,0 +1,66 @@
+[Region: us-east4]
+==============
+Using Nixpacks
+==============
+
+context: 49d2-hp6K
+╔══════════════════════════════ Nixpacks v1.38.0 ══════════════════════════════╗
+║ setup      │ python311                                                       ║
+║──────────────────────────────────────────────────────────────────────────────║
+║ install    │ pip install -r requirements.txt                                 ║
+║──────────────────────────────────────────────────────────────────────────────║
+║ start      │ flask db upgrade && gunicorn --bind 0.0.0.0:$PORT --reuse-port  ║
+║            │ main:app                                                        ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+internal
+load build definition from Dockerfile
+0ms
+
+internal
+load metadata for ghcr.io/railwayapp/nixpacks:ubuntu-1745885067
+113ms
+
+internal
+load .dockerignore
+0ms
+
+stage-0
+FROM ghcr.io/railwayapp/nixpacks:ubuntu-1745885067@sha256:d45c89d80e13d7ad0fd555b5130f22a866d9dd10e861f589932303ef2314c7de
+68ms
+
+internal
+load build context
+0ms
+
+stage-0
+WORKDIR /app/ cached
+0ms
+
+stage-0
+COPY .nixpacks/nixpkgs-bc8f8d1be58e8c8383e683a06e1e1e57893fff87.nix .nixpacks/nixpkgs-bc8f8d1be58e8c8383e683a06e1e1e57893fff87.nix
+23ms
+
+stage-0
+RUN nix-env -if .nixpacks/nixpkgs-bc8f8d1be58e8c8383e683a06e1e1e57893fff87.nix && nix-collect-garbage -d
+46s
+29 store paths deleted, 250.32 MiB freed
+
+stage-0
+COPY . /app/.
+124ms
+
+stage-0
+RUN pip install -r requirements.txt
+129ms
+/bin/bash: line 1: pip: command not found
+Dockerfile:20
+-------------------
+18 |     ENV NIXPACKS_PATH=/opt/venv/bin:$NIXPACKS_PATH
+19 |     COPY . /app/.
+20 | >>> RUN --mount=type=cache,id=s/3172e52b-2245-4af2-9520-85da4a8821bf-/root/cache/pip,target=/root/.cache/pip pip install -r requirements.txt
+21 |
+22 |
+-------------------
+ERROR: failed to build: failed to solve: process "/bin/bash -ol pipefail -c pip install -r requirements.txt" did not complete successfully: exit code: 127
+Error: Docker build failed
