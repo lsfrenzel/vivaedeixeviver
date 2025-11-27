@@ -2,7 +2,7 @@
 providers = ["python"]
 
 [phases.build]
-cmds = ["flask db upgrade || true"]
+cmds = ["flask db upgrade || true", "python init_db.py"]
 
 [start]
 cmd = "gunicorn --bind 0.0.0.0:$PORT --reuse-port main:app"
